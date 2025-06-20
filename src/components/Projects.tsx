@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Filter, ExternalLink, Github, Brain, Code, Palette, Database, Smartphone, Globe, Award, Zap, Eye, Cpu } from 'lucide-react';
+import { projects, filters } from '../data/projects';
 
 const Projects = () => {
   const [activeFilter, setActiveFilter] = useState('all');
@@ -21,130 +23,6 @@ const Projects = () => {
       y: row * 260
     };
   };
-
-  const projects = [
-    {
-      id: 1,
-      title: 'MedCAM',
-      subtitle: 'Medical AI Foundation',
-      category: 'ml',
-      description: 'Multimodal clinically-aware adaptation module for chest X-ray foundation models, fusing EHR data with medical imaging.',
-      technologies: ['PyTorch', 'Computer Vision', 'Medical AI', 'MIMIC-CXR'],
-      icon: Brain,
-      color: '#00D4FF',
-      status: 'Research Paper Submitted',
-      impact: 'Advancing automated medical diagnosis',
-      complexity: 95,
-      innovation: 90
-    },
-    {
-      id: 2,
-      title: 'LetsRise Platform',
-      subtitle: 'Entrepreneurial Matching',
-      category: 'software',
-      description: 'Full-stack web application for matching entrepreneurs with co-founders based on personality assessments.',
-      technologies: ['Flask', 'Vue.js', 'PostgreSQL', 'AWS'],
-      icon: Code,
-      color: '#9D4EDD',
-      status: 'Production',
-      impact: '99.9% uptime, sub-second queries',
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-      complexity: 85,
-      innovation: 75
-    },
-    {
-      id: 3,
-      title: 'Multilingual ASR',
-      subtitle: 'XLS-R Enhancement',
-      category: 'ml',
-      description: 'Fine-tuned Facebook\'s XLS-R for low-resource languages using self-supervised learning.',
-      technologies: ['Hugging Face', 'Transformers', 'FastAPI', 'WebSocket'],
-      icon: Brain,
-      color: '#4ECDC4',
-      status: '15% WER Improvement',
-      impact: 'Real-time multilingual speech recognition',
-      complexity: 90,
-      innovation: 85
-    },
-    {
-      id: 4,
-      title: 'Parkinson\'s MRI',
-      subtitle: 'STN Volume Analysis',
-      category: 'ml',
-      description: 'Machine learning algorithms for analyzing MRI data to quantify Subthalamic Nucleus volume.',
-      technologies: ['FreeSurfer', 'DSI Studio', 'Machine Learning'],
-      icon: Database,
-      color: '#FF6B6B',
-      status: 'Research Collaboration',
-      impact: 'Contributing to Parkinson\'s treatment',
-      complexity: 88,
-      innovation: 80
-    },
-    {
-      id: 5,
-      title: 'Skill Network',
-      subtitle: 'Blockchain P2P Learning',
-      category: 'software',
-      description: 'Mobile platform for peer-to-peer skill exchange with blockchain-based incentive system.',
-      technologies: ['React Native', 'Firebase', 'Blockchain'],
-      icon: Smartphone,
-      color: '#FFD23F',
-      status: 'MVP Complete',
-      impact: 'Democratizing skill sharing',
-      complexity: 80,
-      innovation: 85
-    },
-    {
-      id: 6,
-      title: 'Digital Yearbook',
-      subtitle: 'Interactive Experience',
-      category: 'creative',
-      description: 'First-of-its-kind interactive yearbook praised for innovation in style and narrative.',
-      technologies: ['Design', 'Interactive Media', 'UX/UI'],
-      icon: Palette,
-      color: '#9D4EDD',
-      status: 'Award Winning',
-      impact: 'Set new standard for digital yearbooks',
-      complexity: 70,
-      innovation: 95
-    },
-    {
-      id: 7,
-      title: 'Attention Contagion',
-      subtitle: 'Classroom Analytics',
-      category: 'ml',
-      description: 'Web-based model using facial expression and eye-tracking data to quantify attention spread.',
-      technologies: ['OpenCV', 'Machine Learning', 'Computer Vision'],
-      icon: Eye,
-      color: '#FF9F43',
-      status: 'Research Complete',
-      impact: 'Insights for educational optimization',
-      complexity: 85,
-      innovation: 88
-    },
-    {
-      id: 8,
-      title: 'MS Diagnosis',
-      subtitle: 'Multimodal Pipeline',
-      category: 'ml',
-      description: 'Novel diagnostic approach fusing brain MRI imaging with gut microbiome profiles.',
-      technologies: ['Neural Networks', 'Medical Imaging', 'Bioinformatics'],
-      icon: Cpu,
-      color: '#00D4FF',
-      status: 'Research Pipeline',
-      impact: 'Multimodal medical diagnostics breakthrough',
-      complexity: 92,
-      innovation: 90
-    }
-  ];
-
-  const filters = [
-    { id: 'all', label: 'All Dimensions', icon: Globe, color: '#FFFFFF' },
-    { id: 'ml', label: 'AI Research', icon: Brain, color: '#00D4FF' },
-    { id: 'software', label: 'Software', icon: Code, color: '#9D4EDD' },
-    { id: 'creative', label: 'Creative', icon: Palette, color: '#FFD23F' },
-  ];
 
   const filteredProjects = activeFilter === 'all' 
     ? projects 
@@ -224,10 +102,13 @@ const Projects = () => {
         </div>
 
         {/* Hexagonal Project Grid */}
-        <div className="relative" ref={containerRef}>
+        <div className="relative" ref={containerRef} style={{ perspective: '1200px' }}>
           <div className="flex flex-wrap justify-center gap-8">
             {filteredProjects.map((project, index) => {
               const Icon = project.icon;
+              const isHovered = hoveredProject === project.id;
+              const isAnotherHovered = hoveredProject !== null && !isHovered;
+
               return (
                 <div
                   key={project.id}
@@ -235,183 +116,82 @@ const Projects = () => {
                   onMouseEnter={() => setHoveredProject(project.id)}
                   onMouseLeave={() => setHoveredProject(null)}
                   style={{
-                    animationDelay: `${index * 0.1}s`,
-                    transform: hoveredProject === project.id ? 'scale(1.1) rotateY(10deg)' : 'scale(1) rotateY(0deg)',
+                    transform: isHovered ? 'scale(1.1) rotateY(10deg) translateZ(50px)' : 'scale(1)',
+                    filter: isAnotherHovered ? 'blur(2px) brightness(0.7)' : 'none',
+                    zIndex: isHovered ? 10 : 1,
                     transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                   }}
                 >
                   {/* Hexagonal Container */}
-                  <div className="hex-container w-80 h-80 relative">
+                  <div className="hex-container w-80 h-96 relative">
                     <div 
-                      className="hex-shape absolute inset-0 transition-all duration-500"
+                      className="hex-shape absolute inset-0 transition-all duration-500 overflow-hidden"
                       style={{
-                        backgroundColor: `${project.color}20`,
+                        backgroundColor: `${project.color}10`,
                         borderColor: project.color,
-                        boxShadow: hoveredProject === project.id 
-                          ? `0 0 60px ${project.color}80, inset 0 0 60px ${project.color}20` 
-                          : `0 0 20px ${project.color}40`
+                        boxShadow: isHovered 
+                          ? `0 0 60px ${project.color}60` 
+                          : `0 0 20px ${project.color}30`,
                       }}
                     >
-                      {/* Scanning Lines Effect */}
-                      {hoveredProject === project.id && (
-                        <div className="absolute inset-0 overflow-hidden">
-                          <div className="scan-line absolute w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent
-                                        animate-scan opacity-60"></div>
-                        </div>
-                      )}
-
-                      {/* Project Content */}
-                      <div className="absolute inset-8 flex flex-col justify-center items-center text-center">
+                      <img 
+                        src={project.imageUrl} 
+                        alt={project.title} 
+                        className="absolute top-0 left-0 w-full h-2/3 object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute top-0 left-0 w-full h-2/3 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    </div>
+                    
+                    {/* Content inside hexagon */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-6">
+                      <div className="w-full">
+                        <h3 className="text-2xl font-bold text-white" style={{ textShadow: '0 2px 10px black' }}>{project.title}</h3>
+                        <p className="text-md mb-3" style={{ color: project.color }}>{project.subtitle}</p>
                         
-                        {/* Icon with Orbit Effect */}
-                        <div className="relative mb-4">
-                          <div className="w-16 h-16 rounded-full flex items-center justify-center relative"
-                               style={{ backgroundColor: `${project.color}30` }}>
-                            <Icon size={32} style={{ color: project.color }} 
-                                  className={hoveredProject === project.id ? 'animate-pulse' : ''} />
-                          </div>
-                          {hoveredProject === project.id && (
-                            <div className="absolute inset-0 border-2 rounded-full animate-spin-slow"
-                                 style={{ borderColor: `${project.color}60` }}></div>
+                        <div className="mt-4 flex justify-center items-center gap-4">
+                          <Link to={`/project/${project.id}`} className="px-5 py-2 rounded-lg text-sm font-semibold text-black transition-all duration-300 hover:scale-105" style={{ backgroundColor: project.color, boxShadow: `0 0 20px ${project.color}50` }}>
+                            Read More
+                          </Link>
+                          {(project.category === 'ml' || project.category === 'software') && (
+                            <>
+                              {project.github && (
+                                <a href={project.github} target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-400 transition-colors">
+                                  <Github size={20} />
+                                </a>
+                              )}
+                              {project.demo && (
+                                <a href={project.demo} target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-400 transition-colors">
+                                  <ExternalLink size={20} />
+                                </a>
+                              )}
+                            </>
                           )}
                         </div>
-
-                        {/* Title */}
-                        <h3 className="text-xl font-bold text-white mb-2 transition-colors duration-300"
-                            style={{ color: hoveredProject === project.id ? project.color : 'white' }}>
-                          {project.title}
-                        </h3>
-                        
-                        {/* Subtitle */}
-                        <p className="text-sm mb-3" style={{ color: project.color }}>
-                          {project.subtitle}
-                        </p>
-
-                        {/* Status Badge */}
-                        <div className="mb-4">
-                          <span className="px-3 py-1 rounded-full text-xs font-medium border"
-                                style={{ 
-                                  borderColor: project.color, 
-                                  color: project.color,
-                                  backgroundColor: hoveredProject === project.id ? `${project.color}20` : 'transparent'
-                                }}>
-                            {project.status}
-                          </span>
-                        </div>
-
-                        {/* Complexity Meters */}
-                        {hoveredProject === project.id && (
-                          <div className="w-full space-y-2 animate-fade-in">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-gray-400">Complexity</span>
-                              <span style={{ color: project.color }}>{project.complexity}%</span>
-                            </div>
-                            <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full rounded-full transition-all duration-1000"
-                                style={{ 
-                                  backgroundColor: project.color,
-                                  width: `${project.complexity}%`
-                                }}
-                              />
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-gray-400">Innovation</span>
-                              <span style={{ color: project.color }}>{project.innovation}%</span>
-                            </div>
-                            <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full rounded-full transition-all duration-1000"
-                                style={{ 
-                                  backgroundColor: project.color,
-                                  width: `${project.innovation}%`,
-                                  animationDelay: '0.2s'
-                                }}
-                              />
-                            </div>
-                          </div>
-                        )}
                       </div>
-
-                      {/* Corner Data Points */}
-                      <div className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse"
-                           style={{ backgroundColor: project.color }}></div>
-                      <div className="absolute bottom-2 left-2 w-2 h-2 rounded-full animate-pulse"
-                           style={{ backgroundColor: project.color, animationDelay: '0.5s' }}></div>
+                      <div className="absolute bottom-4 right-6 px-2 py-1 bg-black/50 backdrop-blur-sm rounded text-xs" style={{ color: project.color, border: `1px solid ${project.color}40`}}>
+                        {project.status}
+                      </div>
                     </div>
                   </div>
-
-                  {/* Expanded Info Panel */}
-                  {hoveredProject === project.id && (
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-4 
-                                  bg-black/95 backdrop-blur-md rounded-2xl p-6 w-96 z-20
-                                  border-2 animate-slide-up"
-                                  style={{ borderColor: project.color }}>
-                      <p className="text-gray-300 mb-4 leading-relaxed">{project.description}</p>
-                      
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {project.technologies.map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-2 py-1 rounded-full text-xs border"
-                            style={{ 
-                              borderColor: `${project.color}60`,
-                              color: project.color,
-                              backgroundColor: `${project.color}10`
-                            }}
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="flex space-x-3">
-                        {project.github && (
-                          <a href={project.github} 
-                             className="flex items-center space-x-2 px-4 py-2 rounded-lg border transition-all duration-300
-                                      hover:scale-105"
-                             style={{ borderColor: project.color, color: project.color }}>
-                            <Github size={16} />
-                            <span className="text-sm">Code</span>
-                          </a>
-                        )}
-                        {project.demo && (
-                          <a href={project.demo}
-                             className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium
-                                      transition-all duration-300 hover:scale-105"
-                             style={{ backgroundColor: project.color, color: 'black' }}>
-                            <ExternalLink size={16} />
-                            <span className="text-sm">Demo</span>
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Bottom CTA with Holographic Effect */}
-        <div className="text-center mt-24 py-16">
-          <div className="relative">
-            <p className="text-4xl text-gray-300 mb-8 holographic-text" data-text="Ready to jack into the matrix?">
-              Ready to jack into the matrix?
-            </p>
-            <a
-              href="/contact"
-              className="inline-block px-12 py-6 bg-gradient-to-r from-[#00D4FF] to-[#9D4EDD] 
-                       rounded-2xl font-bold text-xl hover:scale-110 transition-all duration-500
-                       hover:shadow-2xl relative overflow-hidden group"
-              style={{ boxShadow: '0 0 60px rgba(0, 212, 255, 0.3)' }}
-            >
-              <span className="relative z-10">Initialize Connection</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#9D4EDD] to-[#FFD23F] 
-                            transform scale-x-0 group-hover:scale-x-100 transition-transform 
-                            duration-500 origin-center"></div>
-            </a>
-          </div>
+        {/* Call to Action */}
+        <div className="text-center mt-24 py-12">
+          <p className="text-3xl text-gray-300 mb-8">
+            Ready to jack into the matrix?
+          </p>
+          <a
+            href="/contact"
+            className="inline-block px-10 py-5 bg-gradient-to-r from-[#00D4FF] to-[#9D4EDD] 
+                     rounded-2xl font-bold text-xl hover:scale-110 transition-all duration-300
+                     hover:shadow-2xl hover:shadow-[#00D4FF]/50"
+          >
+            Initialize Connection
+          </a>
         </div>
       </div>
     </div>

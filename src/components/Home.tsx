@@ -107,14 +107,6 @@ const Home = () => {
         showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}>
         
-        {/* System Status with Matrix Effect */}
-        <div className="mb-8 text-[#00D4FF] font-mono text-sm">
-          <div className="flex items-center justify-center space-x-2">
-            <div className="w-2 h-2 bg-[#00D4FF] rounded-full animate-pulse"></div>
-            <span className="matrix-text">CONSCIOUSNESS.EXE LOADED</span>
-          </div>
-        </div>
-
         {/* Interactive Name with Crazy Effects */}
         <div className="name-container mb-8 perspective-1000">
           <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
@@ -127,19 +119,18 @@ const Home = () => {
                   onMouseEnter={() => setHoveredLetter(letter.char)}
                   onMouseLeave={() => setHoveredLetter(null)}
                   style={{
-                    transform: hoveredLetter === letter.char 
-                      ? `rotateY(180deg) scale(1.2) translateZ(50px)` 
-                      : 'rotateY(0deg) scale(1) translateZ(0px)',
-                    transition: 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                    transform: hoveredLetter === letter.char ? 'scale(1.05)' : 'scale(1)',
+                    transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
                   }}
                 >
                   {/* Letter with Holographic Effect */}
                   <div className={`
                     letter text-6xl sm:text-8xl md:text-9xl font-bold
-                    transition-all duration-500 ease-out relative
+                    transition-all duration-400 ease-out relative
                     ${hoveredLetter === letter.char ? 'holographic' : 'text-white'}
                   `}
                   style={{
+                    opacity: hoveredLetter === letter.char ? 0 : 1,
                     textShadow: hoveredLetter === letter.char 
                       ? `0 0 20px ${letter.color}, 0 0 40px ${letter.color}, 0 0 60px ${letter.color}`
                       : '0 0 10px rgba(255,255,255,0.3)',
@@ -168,35 +159,38 @@ const Home = () => {
                   </div>
                   
                   {/* Morphing Icon */}
-                  {hoveredLetter === letter.char && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Icon 
-                        size={48} 
-                        style={{ color: letter.color }}
-                        className="animate-morph"
-                      />
-                    </div>
-                  )}
+                  <div className="absolute inset-0 flex items-center justify-center"
+                       style={{
+                         opacity: hoveredLetter === letter.char ? 1 : 0,
+                         transition: 'opacity 0.4s ease-out'
+                       }}>
+                    <Icon 
+                      size={48} 
+                      style={{ color: letter.color }}
+                      className="animate-morph"
+                    />
+                  </div>
                   
                   {/* Floating Tooltip with Typewriter Effect */}
                   {hoveredLetter === letter.char && (
-                    <div className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 
+                    <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 
                                   bg-black/95 backdrop-blur-sm px-6 py-4 rounded-lg 
-                                  text-sm font-medium whitespace-nowrap z-20
-                                  border-2 animate-border-flow"
+                                  text-sm font-medium z-20
+                                  border-2 animate-border-flow
+                                  w-[280px]"
                                   style={{ borderColor: letter.color }}>
                       <div className="text-center">
                         <div style={{ color: letter.color }} className="font-bold typewriter">
                           {letter.tooltip}
                         </div>
-                        <div className="text-gray-300 text-xs mt-2 max-w-48 typewriter-delay">
+                        <div className="text-gray-300 text-xs mt-2 break-words typewriter-delay">
                           {letter.description}
                         </div>
                       </div>
-                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 
-                                    w-0 h-0 border-l-4 border-r-4 border-b-4 
+                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 
+                                    w-0 h-0 border-l-4 border-r-4 border-t-4 
                                     border-transparent"
-                                    style={{ borderBottomColor: letter.color }}></div>
+                                    style={{ borderTopColor: letter.color }}></div>
                     </div>
                   )}
                 </div>

@@ -1,114 +1,341 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Code, Palette, Trophy, Camera, Database, Brain, Sparkles, Award, Zap, Target, Waves } from 'lucide-react';
+import { Code, Palette, Trophy, Camera, Database, Brain, Sparkles, Award, Zap, Target, Waves, Eye, ArrowDown } from 'lucide-react';
+import me from '../assets/me.png';
 
-const About = () => {
-  const [activeSection, setActiveSection] = useState<'tech' | 'creative' | 'athletic'>('tech');
-  const [isVisible, setIsVisible] = useState(false);
-  const [brainWaves, setBrainWaves] = useState<number[]>([]);
+// Custom Hook for 3D Tilt Effect on Profile
+const useProfileTilt = () => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY, currentTarget } = e;
+      if (!currentTarget) return;
+      const { left, top, width, height } = (currentTarget as HTMLElement).getBoundingClientRect();
+      const x = (clientX - left) / width;
+      const y = (clientY - top) / height;
+      const rotateX = -8 * (y - 0.5);
+      const rotateY = 8 * (x - 0.5);
+      el.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.1)`;
+    };
+
+    const handleMouseLeave = () => {
+      el.style.transform = 'rotateX(0) rotateY(0) scale(1)';
+    };
+
+    const container = el.parentElement;
+    container?.addEventListener('mousemove', handleMouseMove);
+    container?.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      container?.removeEventListener('mousemove', handleMouseMove);
+      container?.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+
+  return ref;
+};
+
+// Custom Hook for Generative Canvas Background
+const useGenerativeCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    setIsVisible(true);
-    // Generate brain wave data
-    const waves = Array.from({ length: 100 }, (_, i) => Math.sin(i * 0.1) * 50 + Math.random() * 20);
-    setBrainWaves(waves);
-  }, []);
-
-  // Neural network animation
-  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    let animationFrameId: number;
+    const particles: any[] = [];
+    const particleCount = 70;
+
+    const resizeCanvas = () => {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-
-    const nodes: Array<{ x: number; y: number; vx: number; vy: number; connections: number[] }> = [];
+    };
     
-    // Create nodes
-    for (let i = 0; i < 30; i++) {
-      nodes.push({
+    const init = () => {
+      resizeCanvas();
+      particles.length = 0;
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         vx: (Math.random() - 0.5) * 0.5,
         vy: (Math.random() - 0.5) * 0.5,
-        connections: []
+          radius: Math.random() * 1.5 + 1,
       });
     }
+    };
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Update and draw nodes
-      nodes.forEach((node, i) => {
-        node.x += node.vx;
-        node.y += node.vy;
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
         
-        if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
-        if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
-        
-        // Draw node
         ctx.beginPath();
-        ctx.arc(node.x, node.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = '#00D4FF';
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.fill();
-        
-        // Draw connections
-        nodes.slice(i + 1).forEach((otherNode, j) => {
-          const dx = node.x - otherNode.x;
-          const dy = node.y - otherNode.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          if (distance < 100) {
+      });
+
             ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(otherNode.x, otherNode.y);
-            ctx.strokeStyle = `rgba(0, 212, 255, ${0.3 * (1 - distance / 100)})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
+      particles.forEach(p1 => {
+        particles.forEach(p2 => {
+          const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+          if (dist < 100) {
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${1 - dist / 100})`;
           }
         });
       });
+      ctx.stroke();
       
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
     
+    init();
     animate();
-  }, [activeSection]);
+
+    window.addEventListener('resize', init);
+
+    return () => {
+      window.removeEventListener('resize', init);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+  
+  return canvasRef;
+};
+
+// Custom Hook for 3D Tilt Effect
+const useTilt = (active: boolean) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current || !active) return;
+
+    const el = ref.current;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY, currentTarget } = e;
+      const { left, top, width, height } = (currentTarget as HTMLElement).getBoundingClientRect();
+      const x = (clientX - left) / width;
+      const y = (clientY - top) / height;
+      const rotateX = -10 * (y - 0.5);
+      const rotateY = 10 * (x - 0.5);
+      el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+    };
+
+    const handleMouseLeave = () => {
+      el.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    };
+
+    el.addEventListener('mousemove', handleMouseMove);
+    el.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      el.removeEventListener('mousemove', handleMouseMove);
+      el.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [active]);
+
+  return ref;
+};
+
+// Custom Component for Animated Stats
+const AnimatedStat = ({ value }: { value: number }) => {
+  const [currentValue, setCurrentValue] = useState(0);
+  const ref = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          let start = 0;
+          const end = value;
+          if (start === end) return;
+
+          const duration = 1500;
+          const startTime = Date.now();
+
+          const step = () => {
+            const now = Date.now();
+            const progress = Math.min((now - startTime) / duration, 1);
+            const nextValue = Math.floor(progress * end);
+            setCurrentValue(nextValue);
+            if (progress < 1) {
+              requestAnimationFrame(step);
+            }
+          };
+          requestAnimationFrame(step);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [value]);
+
+  return <p ref={ref} className="text-2xl font-bold text-white">{currentValue}</p>;
+};
+
+const About = () => {
+  const [activeSection, setActiveSection] = useState<'tech' | 'creative' | 'athletic'>('tech');
+  const [isVisible, setIsVisible] = useState(false);
+  const profileTiltRef = useProfileTilt();
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  const creativeTiltRef = useTilt(activeSection === 'creative');
+  const athleticTiltRef = useTilt(activeSection === 'athletic');
 
   const techSkills = [
-    { name: 'Machine Learning', level: 95, color: '#00D4FF' },
-    { name: 'Python/C++', level: 90, color: '#9D4EDD' },
-    { name: 'Web Development', level: 85, color: '#FFD23F' },
-    { name: 'Data Science', level: 88, color: '#4ECDC4' },
-    { name: 'Cloud Computing', level: 82, color: '#FF6B6B' },
+    { name: 'Machine Learning', level: 5, color: '#00D4FF' },
+    { name: 'Python/C++', level: 5, color: '#9D4EDD' },
+    { name: 'Web Development', level: 4, color: '#FFD23F' },
+    { name: 'Data Science', level: 4, color: '#4ECDC4' },
+    { name: 'Cloud Computing', level: 4, color: '#FF6B6B' },
   ];
 
-  const experiences = [
+  const techTimeline = [
     {
-      role: 'Research Assistant',
-      company: 'Clinical AI Lab - NYUAD',
-      period: 'Nov 2024 - Present',
-      description: 'Developing MedCAM for chest X-ray analysis using multimodal AI',
-      technologies: ['PyTorch', 'TensorFlow', 'Computer Vision', 'Medical AI']
+      year: '2025',
+      items: [
+        {
+          title: 'Research Assistant – Computational Biology & Bioinformatics Lab',
+          logo: 'https://picsum.photos/seed/compbio/40/40',
+          location: 'NYU Abu Dhabi',
+          date: 'Mar 2025 – Present',
+          description: 'Working on a diagnostic tool for Multiple Sclerosis by combining brain MRI scans and gut microbiome data. Built custom neural networks for these data types and used explainability tools to better understand the results.',
+        },
+      ]
     },
     {
-      role: 'Software Engineer',
-      company: 'LetsRise Enterprise',
-      period: 'May 2024 - Oct 2024',
-      description: 'Full-stack development for entrepreneurial matching platform',
-      technologies: ['Flask', 'Vue.js', 'PostgreSQL', 'AWS']
+      year: '2024',
+      items: [
+        {
+          title: 'Research Assistant – Clinical AI Lab (MedCAM)',
+          logo: 'https://picsum.photos/seed/medcam/40/40',
+          location: 'NYU Abu Dhabi',
+          date: 'Nov 2024 – Present',
+          description: 'Helped develop MedCAM, a model that combines chest X-rays with electronic health records. Tested it on large clinical datasets for tasks like classification, segmentation, and detecting unusual cases.',
+        },
+        {
+          title: 'Research Assistant – Cleveland Clinic Abu Dhabi',
+          logo: 'https://picsum.photos/seed/cleveland/40/40',
+          location: 'Abu Dhabi',
+          date: 'Feb 2024 – Nov 2024',
+          description: 'Created machine learning pipelines to analyze MRI data from Parkinson\'s patients. Used tools for brain imaging and tracking connections to better understand brain structure changes.',
+        },
+        {
+          title: 'Software Engineer – LETSRISE Enterprise / Hub71',
+          logo: 'https://picsum.photos/seed/letsrise/40/40',
+          location: 'Abu Dhabi',
+          date: 'May 2024 – Oct 2024',
+          description: 'Built a full-stack web app with Flask, Vue.js, and PostgreSQL. Developed secure APIs, live data visualizations, and a system to match identities to help entrepreneurs collaborate.',
+        },
+        {
+          title: 'Data Analyst – Teaching, Learning & Development Lab',
+          logo: 'https://picsum.photos/seed/tld/40/40',
+          location: 'NYU Abu Dhabi',
+          date: 'Jan 2024 – Present',
+          description: 'Analyzed early childhood development data using Python and R. Created surveys and visualized results to support parenting programs.',
+        },
+        {
+          title: 'Microsoft Learn Student Ambassador',
+          logo: 'https://picsum.photos/seed/microsoft/40/40',
+          location: 'Remote',
+          date: 'Dec 2023 – May 2024',
+          description: 'Ran over 10 workshops on cloud computing, DevOps, and AI/ML with Azure. Built demo apps and tools for outreach.',
+        },
+      ]
     },
     {
-      role: 'Microsoft Student Ambassador',
-      company: 'Microsoft',
-      period: 'Dec 2023 - May 2024',
-      description: 'Led workshops on Azure and Power Platform for 500+ students',
-      technologies: ['Azure', 'Power Platform', 'Cloud Architecture']
+      year: '2023',
+      items: [
+        {
+          title: 'AI & Web Instructor – Faris Technology Institute',
+          logo: 'https://picsum.photos/seed/faris/40/40',
+          location: 'Addis Ababa',
+          date: 'Jun 2023 – Dec 2023',
+          description: 'Taught full-stack web development and Python for AI to 100+ students. Developed a social entrepreneurship platform in three languages.',
+        },
+      ]
     }
   ];
+
+  const creativeProjects = {
+    visualStorytelling: {
+      title: 'Creative Experience',
+      icon: Camera,
+      items: [
+        {
+          title: 'Project Manager – Student Success & Well-Being',
+          location: 'NYU Abu Dhabi',
+          date: 'Jan 2023 – Present',
+          description: 'Led visual campaigns and events for mental health. Created event photos, murals, and videos to bring the community together.',
+        },
+        {
+          title: 'Photographer & Video Editor – Gazelle News Media',
+          location: 'Abu Dhabi',
+          date: 'Jan 2023 – Aug 2023',
+          description: 'Captured and edited photos and videos for student news stories and documentaries.',
+        },
+        {
+          title: 'Design Intern – Sheikh Mohamed bin Zayed Scholars Program',
+          location: 'NYU Abu Dhabi',
+          date: 'Sep 2023 – Dec 2023',
+          description: "Designed NYUAD's first interactive digital yearbook for the Summer Academy. Automated workflows and created recruitment materials.",
+        },
+        {
+          title: 'Educational Media Producer – Arab Crossroads Studies',
+          location: 'Abu Dhabi',
+          date: 'Feb 2023 – Mar 2023',
+          description: 'Managed the program website, made newsletters, and promoted educational programs.',
+        },
+        {
+          title: 'Creative Marketing Intern – ZYWA',
+          location: 'Dubai',
+          date: 'Feb 2023 – Mar 2023',
+          description: 'Ran campaigns that boosted brand awareness by 15%. Produced social media and offline event content.',
+        },
+        {
+          title: 'Digital Marketing Intern – StudentsEra',
+          location: 'Remote',
+          date: 'Mar 2023 – Mar 2025',
+          description: 'Handled digital content, grew social media engagement by 20%, and helped run successful email campaigns.',
+        },
+      ],
+    },
+    creativePhilosophy: {
+      title: 'Creative Philosophy',
+      icon: Sparkles,
+      quote: '"I believe technology should be beautiful, accessible, and meaningful. Every pixel has purpose, every interaction tells a story."',
+      principles: [
+        { text: 'Human-centered design thinking', color: '#9D4EDD' },
+        { text: 'Emotional intelligence in UX', color: '#4ECDC4' },
+        { text: 'Accessibility and inclusion', color: '#FF6B6B' },
+        { text: 'Storytelling through data', color: '#FFD23F' },
+      ],
+    },
+  };
 
   const athleticAchievements = [
     {
@@ -134,293 +361,233 @@ const About = () => {
     }
   ];
 
-  return (
-    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-900 via-black to-gray-800">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Morphing Header */}
-        <div className={`text-center mb-16 transition-all duration-1000 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}>
-          <h1 className="text-4xl sm:text-6xl font-bold mb-6 relative">
-            <span className="split-text text-[#00D4FF]" data-text="Split Brain">Split Brain</span>
-            <span className="split-text text-white" data-text=" Interface"> Interface</span>
-            <div className="absolute -inset-4 bg-gradient-to-r from-[#00D4FF]/20 to-[#9D4EDD]/20 blur-xl -z-10 animate-pulse"></div>
-          </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto typewriter-about">
-            Where analytical thinking meets creative expression, and athletic discipline drives innovation
-          </p>
-        </div>
+  const athleticValues = [
+    { text: 'Discipline & Consistency', description: 'Daily training routines translate to consistent coding practices', color: '#FFD23F' },
+    { text: 'Team Collaboration', description: 'Understanding how individual contributions create collective success', color: '#FF6B6B' },
+    { text: 'Performance Under Pressure', description: 'Thriving in high-stakes competitions and tight project deadlines', color: '#4ECDC4' },
+    { text: 'Continuous Improvement', description: 'Always analyzing performance to optimize and push boundaries', color: '#9D4EDD' },
+  ];
 
-        {/* Morphing Section Selector */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-black/50 backdrop-blur-md rounded-2xl p-3 flex space-x-3 border border-gray-700">
-            {[
-              { id: 'tech', label: 'Tech', icon: Code, color: '#00D4FF' },
-              { id: 'creative', label: 'Creative', icon: Palette, color: '#9D4EDD' },
-              { id: 'athletic', label: 'Athletic', icon: Trophy, color: '#FFD23F' }
-            ].map(({ id, label, icon: Icon, color }) => (
-              <button
-                key={id}
-                onClick={() => setActiveSection(id as any)}
-                className={`flex items-center space-x-3 px-8 py-4 rounded-xl transition-all duration-500 relative overflow-hidden group ${
-                  activeSection === id
-                    ? 'text-black font-bold shadow-lg transform scale-105'
-                    : 'text-gray-300 hover:text-white hover:scale-102'
-                }`}
+  const sectionConfig = {
+    tech: { color: '#00D4FF', icon: Code },
+    creative: { color: '#9D4EDD', icon: Palette },
+    athletic: { color: '#FFD23F', icon: Trophy },
+  };
+
+  return (
+    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
+      <div className="max-w-7xl mx-auto pb-20">
+        
+        {/* New Profile Hero Section */}
+        <div className={`profile-hero-container text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="relative inline-block">
+            <div ref={profileTiltRef} className="profile-image-wrapper">
+              <div
+                className="relative w-64 h-64 rounded-full flex items-center justify-center overflow-hidden"
                 style={{
-                  backgroundColor: activeSection === id ? color : 'transparent',
-                  boxShadow: activeSection === id ? `0 0 30px ${color}40` : 'none'
+                  background: 'radial-gradient(ellipse at center, #1b2735 0%, #090a0f 100%)',
+                  boxShadow: '0 0 60px rgba(0, 212, 255, 0.2), inset 0 0 40px rgba(0,0,0,0.6)'
                 }}
               >
-                <Icon size={20} className={activeSection === id ? 'animate-spin-slow' : ''} />
-                <span className="text-lg">{label}</span>
-                {activeSection !== id && (
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
-                    style={{ backgroundColor: color }}
-                  />
-                )}
-              </button>
-            ))}
+                <img 
+                  src={me} 
+                  alt="My Headshot"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
+          <h1 className="text-4xl sm:text-6xl font-bold mt-8 mb-4">A Multifaceted Profile</h1>
+          <p className="text-xs text-gray-500 italic max-w-md mx-auto mb-6">
+            This sweet sketch, drawn by a refugee child I've been lucky to mentor, shows their kind view of me.
+          </p>
+          <p className="text-lg text-gray-400 max-w-3xl mx-auto mb-12">
+            Explore the different dimensions of my experience, from technical expertise to creative endeavors and athletic pursuits.
+          </p>
+          <div className="flex flex-col items-center gap-2 text-gray-500 animate-bounce-more">
+            <span className="text-sm tracking-widest animate-subtle-glow" style={{ color: '#00D4FF' }}>SCROLL</span>
+            <ArrowDown size={24} className="animate-subtle-glow" style={{ color: '#00D4FF' }} />
           </div>
         </div>
 
-        {/* Tech Section - Neural Network Theme */}
-        {activeSection === 'tech' && (
-          <div className="grid md:grid-cols-2 gap-12 items-start">
-            
-            {/* Neural Network Visualization */}
-            <div className="relative">
-              <canvas 
-                ref={canvasRef}
-                className="w-full h-96 bg-black/30 rounded-2xl border border-[#00D4FF]/30"
-              />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center">
-                  <Brain size={64} className="text-[#00D4FF] mx-auto mb-4 animate-pulse" />
-                  <h3 className="text-2xl font-bold text-[#00D4FF] mb-2">Neural Processing</h3>
-                  <p className="text-gray-300">Real-time thought visualization</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Skills with Brain Wave Animation */}
-            <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-[#00D4FF] mb-8 glitch-text" data-text="Technical Synapses">
-                Technical Synapses
-              </h3>
-              {techSkills.map((skill, index) => (
-                <div key={skill.name} className="relative group">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-white font-medium text-lg">{skill.name}</span>
-                    <span className="text-gray-400 font-mono">{skill.level}%</span>
-                  </div>
-                  <div className="relative h-4 bg-gray-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-1000 relative overflow-hidden"
-                      style={{
-                        backgroundColor: skill.color,
-                        width: `${skill.level}%`,
-                        animationDelay: `${index * 0.2}s`,
-                      }}
-                    >
-                      {/* Flowing energy effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent 
-                                    animate-flow transform -skew-x-12"></div>
-                    </div>
-                  </div>
-                  {/* Brain wave visualization */}
-                  <div className="mt-2 h-8 flex items-end space-x-1">
-                    {brainWaves.slice(0, 20).map((wave, i) => (
-                      <div
-                        key={i}
-                        className="w-1 bg-gradient-to-t from-transparent rounded-full transition-all duration-300"
-                        style={{
-                          height: `${Math.abs(wave) / 3}px`,
-                          backgroundColor: skill.color,
-                          opacity: 0.6,
-                          animationDelay: `${i * 0.1}s`
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Creative Section - Artistic Chaos */}
-        {activeSection === 'creative' && (
-          <div className="relative">
-            {/* Floating Art Elements */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              {[...Array(15)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute animate-float-random"
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    animationDelay: `${Math.random() * 5}s`,
-                    animationDuration: `${5 + Math.random() * 10}s`
+        {/* Tab Switcher */}
+        <div className="flex justify-center mb-12">
+          <div className="bg-black/30 p-2 rounded-xl flex items-center gap-2 border border-gray-700">
+            {Object.keys(sectionConfig).map((key) => {
+              const config = sectionConfig[key as keyof typeof sectionConfig];
+              const Icon = config.icon;
+              return (
+              <button
+                  key={key}
+                  onClick={() => setActiveSection(key as 'tech' | 'creative' | 'athletic')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 flex items-center gap-2
+                    ${activeSection === key 
+                      ? `text-white shadow-lg` 
+                      : 'text-gray-400 hover:bg-gray-700/50'}`
+                  }
+                style={{
+                    backgroundColor: activeSection === key ? config.color : 'transparent',
+                    boxShadow: activeSection === key ? `0 0 15px ${config.color}50` : 'none'
                   }}
                 >
-                  <div 
-                    className="w-8 h-8 rounded-full opacity-30 blur-sm"
-                    style={{
-                      background: `radial-gradient(circle, ${['#9D4EDD', '#FF6B6B', '#FFD23F', '#4ECDC4'][Math.floor(Math.random() * 4)]}, transparent)`,
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
+                  <Icon size={16} />
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+              </button>
+              );
+            })}
+          </div>
+        </div>
 
-            <div className="grid md:grid-cols-2 gap-12 relative z-10">
-              {/* Paint Splash Effect */}
+        {/* Tech Section */}
+        {activeSection === 'tech' && (
+          <div className="animate-fade-in">
+            <div className="mb-16 relative">
+              <h2 className="text-3xl font-bold text-center text-[#00D4FF] mb-12">Technical Journey</h2>
+              
               <div className="relative">
-                <div className="paint-canvas bg-gradient-to-br from-[#9D4EDD]/20 to-[#FF6B6B]/20 rounded-3xl p-8 
-                              border-4 border-dashed border-[#9D4EDD]/50 relative overflow-hidden">
-                  <div className="absolute inset-0 paint-splashes"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center space-x-3 mb-6">
-                      <Camera className="text-[#9D4EDD] animate-bounce" size={32} />
-                      <h3 className="text-3xl font-bold text-[#9D4EDD] brush-text">Visual Storytelling</h3>
+                {/* Central Timeline Line */}
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-[1px] h-full bg-gray-600" />
+                
+                {techTimeline.map((yearGroup, index) => (
+                  <div key={index} className="mb-16 relative">
+                    {/* Year Marker */}
+                    <div className="relative flex justify-center mb-8">
+                      <div className="text-xl font-bold text-purple-400 bg-black px-3 py-1 rounded-md border border-gray-700">
+                        {yearGroup.year}
+                      </div>
                     </div>
-                    <div className="space-y-6">
-                      {[
-                        { title: 'Photography & Videography', desc: 'Gazelle Newspaper - Visual content creation' },
-                        { title: 'Design & Media', desc: 'Student Success & Well-being campaigns' },
-                        { title: 'Educational Media', desc: 'Award-winning Summer Academy Yearbook' }
-                      ].map((item, i) => (
-                        <div key={i} className="creative-card bg-black/40 backdrop-blur-sm rounded-2xl p-6 
-                                              border border-[#9D4EDD]/30 hover:border-[#9D4EDD] transition-all duration-300
-                                              hover:transform hover:rotate-1 hover:scale-105">
-                          <h4 className="text-xl font-bold text-white mb-2 paint-drip">{item.title}</h4>
-                          <p className="text-gray-300">{item.desc}</p>
-                          <div className="mt-4 flex space-x-2">
-                            {[...Array(3)].map((_, j) => (
-                              <div key={j} className="w-2 h-2 rounded-full bg-[#9D4EDD] animate-pulse" 
-                                   style={{ animationDelay: `${j * 0.2}s` }} />
-                            ))}
+
+                    {/* Timeline Items */}
+            <div className="relative">
+                      {yearGroup.items.map((item, itemIndex) => (
+                        <div 
+                          key={itemIndex} 
+                          className={`relative mb-8 flex ${
+                            itemIndex % 2 === 0 ? 'justify-start' : 'justify-end'
+                          }`}
+                        >
+                          {/* Content Box */}
+                          <div className={`w-[40%] ${itemIndex % 2 === 0 ? 'mr-[10%]' : 'ml-[10%]'}`}>
+                            <div className="bg-black/30 rounded-lg p-4 border border-gray-700 h-full flex flex-col">
+                              <div className="flex items-start gap-4 flex-grow">
+                                <img src={item.logo} alt={`${item.title} logo`} className="w-10 h-10 rounded-full mt-1" />
+                                <div>
+                                  <h3 className="text-lg font-semibold text-white mb-1">{item.title}</h3>
+                                  <p className="text-sm text-purple-400 mb-2">{item.location}</p>
+                                  <p className="text-gray-400 text-sm leading-relaxed">{item.description}</p>
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-4 text-right">{item.date}</p>
+                            </div>
+                          </div>
+
+                          {/* Connecting Line */}
+                          <div 
+                            className={`absolute top-[50%] ${
+                              itemIndex % 2 === 0 ? 'right-[50%]' : 'left-[50%]'
+                            } w-[10%] h-[1px] bg-gray-600`}
+                          />
+
+                          {/* Connection Point */}
+                          <div className="absolute left-1/2 top-[50%] transform -translate-x-1/2 -translate-y-1/2">
+                            <div className="w-2 h-2 rounded-full bg-gray-400 border border-gray-600" />
                           </div>
                         </div>
                       ))}
                     </div>
-                  </div>
                 </div>
+                ))}
               </div>
+            </div>
 
-              {/* Philosophy with Morphing Text */}
-              <div className="space-y-8">
-                <div className="philosophy-container bg-gradient-to-br from-black/80 to-[#9D4EDD]/20 
-                              rounded-3xl p-8 border border-[#FFD23F]/50 relative overflow-hidden">
-                  <div className="absolute inset-0 creative-bg-pattern opacity-10"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center space-x-3 mb-6">
-                      <Sparkles className="text-[#FFD23F] animate-spin-slow" size={32} />
-                      <h3 className="text-3xl font-bold text-[#FFD23F] morphing-text">Creative Philosophy</h3>
-                    </div>
-                    <blockquote className="text-2xl text-white mb-8 italic leading-relaxed quote-animation">
-                      "I believe technology should be beautiful, accessible, and meaningful. 
-                      Every pixel has purpose, every interaction tells a story."
-                    </blockquote>
-                    <div className="space-y-4">
-                      {[
-                        { text: 'Human-centered design thinking', color: '#9D4EDD' },
-                        { text: 'Emotional intelligence in UX', color: '#FF6B6B' },
-                        { text: 'Accessibility and inclusion', color: '#4ECDC4' },
-                        { text: 'Storytelling through data', color: '#FFD23F' }
-                      ].map((principle, i) => (
-                        <div key={i} className="flex items-center space-x-4 group">
-                          <div 
-                            className="w-4 h-4 rounded-full transition-all duration-300 group-hover:scale-150"
-                            style={{ backgroundColor: principle.color }}
-                          />
-                          <span className="text-gray-300 group-hover:text-white transition-colors duration-300 text-lg">
-                            {principle.text}
-                          </span>
-                        </div>
-                      ))}
+            <div className="space-y-6">
+              <h3 className="text-3xl font-bold text-center text-[#00D4FF] mb-8">Technical Skills</h3>
+              <div className="max-w-lg mx-auto">
+                {techSkills.map((skill) => (
+                  <div key={skill.name} className="relative group mb-4">
+                    <div className="flex justify-between items-center">
+                    <span className="text-white font-medium text-lg">{skill.name}</span>
+                      <span className="font-mono text-lg" style={{ color: skill.color }}>
+                        {'★'.repeat(skill.level)}{'☆'.repeat(5 - skill.level)}
+                      </span>
                     </div>
                   </div>
+                    ))}
+                  </div>
+            </div>
+          </div>
+        )}
+
+        {/* Creative Section */}
+        {activeSection === 'creative' && (
+          <div className="animate-fade-in grid md:grid-cols-2 gap-8" style={{ perspective: '1200px' }}>
+            {/* Visual Storytelling */}
+            <div ref={creativeTiltRef} className="bg-black/30 p-6 rounded-2xl border border-purple-500/30 transition-all duration-300 flex flex-col" style={{ transformStyle: 'preserve-3d' }}>
+              <div className="flex items-center gap-3 mb-6">
+                <creativeProjects.visualStorytelling.icon size={24} className="text-purple-400" />
+                <h3 className="text-2xl font-bold text-purple-400">{creativeProjects.visualStorytelling.title}</h3>
                 </div>
+              <div className="space-y-4 flex-grow">
+                {creativeProjects.visualStorytelling.items.map((item, index) => (
+                  <div key={index} className="bg-gray-800/50 p-4 rounded-lg lift-up flex flex-col">
+                    <div className="flex-grow">
+                      <h4 className="font-bold text-white">{item.title}</h4>
+                      <p className="text-sm text-purple-400">{item.location}</p>
+                      <p className="text-sm text-gray-400 mt-2">{item.description}</p>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-4 text-right">{item.date}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Creative Philosophy */}
+            <div className="bg-black/30 p-6 rounded-2xl border border-yellow-500/30">
+              <div className="flex items-center gap-3 mb-6">
+                <creativeProjects.creativePhilosophy.icon size={24} className="text-yellow-400" />
+                <h3 className="text-2xl font-bold text-yellow-400">{creativeProjects.creativePhilosophy.title}</h3>
+              </div>
+              <p className="text-lg italic text-gray-300 mb-6 border-l-4 border-yellow-500 pl-4 shimmer-text">
+                {creativeProjects.creativePhilosophy.quote}
+              </p>
+              <div className="space-y-3">
+                {creativeProjects.creativePhilosophy.principles.map((principle, index) => (
+                  <div key={index} className="flex items-center gap-3 dot-pulse" style={{ '--dot-color': principle.color } as React.CSSProperties}>
+                    <div className="w-2 h-2 rounded-full transition-all duration-300" style={{ backgroundColor: principle.color }} />
+                    <span className="text-gray-300">{principle.text}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* Athletic Section - Sports Arena */}
+        {/* Athletic Section */}
         {activeSection === 'athletic' && (
-          <div className="space-y-12">
-            {/* Stadium-like Header */}
-            <div className="text-center relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#FFD23F]/20 via-transparent to-[#FFD23F]/20 
-                            rounded-full blur-3xl"></div>
-              <h3 className="text-5xl font-bold text-[#FFD23F] mb-4 relative z-10 stadium-text">
-                ATHLETIC EXCELLENCE
-              </h3>
-              <p className="text-2xl text-gray-300 max-w-4xl mx-auto relative z-10">
-                Sports have taught me discipline, teamwork, and the relentless pursuit of improvement
+          <div className="animate-fade-in space-y-12">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-yellow-400 inline-block px-4 py-2 bg-yellow-500/10 rounded-lg">ATHLETIC EXCELLENCE</h2>
+              <p className="text-lg text-gray-300 max-w-2xl mx-auto mt-4">
+                Sports have taught me discipline, teamwork, and the relentless pursuit of improvement.
               </p>
             </div>
 
-            {/* Sports Cards with 3D Effect */}
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-8" style={{ perspective: '1200px' }}>
               {athleticAchievements.map((achievement, index) => {
                 const Icon = achievement.icon;
                 return (
-                  <div
-                    key={index}
-                    className="sports-card bg-gradient-to-br from-black/80 to-[#FFD23F]/20 
-                             rounded-3xl p-8 text-center relative overflow-hidden
-                             transform transition-all duration-500 hover:scale-105 hover:rotate-2
-                             border-2 border-[#FFD23F]/30 hover:border-[#FFD23F]"
-                    style={{
-                      boxShadow: '0 20px 40px rgba(255, 210, 63, 0.1)',
-                      transform: `perspective(1000px) rotateX(${index * 2}deg)`
-                    }}
-                  >
-                    {/* Animated Background */}
-                    <div className="absolute inset-0 sports-bg-pattern opacity-5"></div>
-                    
-                    {/* Icon with Orbit Effect */}
-                    <div className="relative mb-6">
-                      <div className="w-20 h-20 mx-auto bg-[#FFD23F]/20 rounded-full flex items-center justify-center
-                                    relative overflow-hidden">
-                        <Icon size={40} className="text-[#FFD23F] z-10 relative" />
-                        <div className="absolute inset-0 bg-[#FFD23F]/30 rounded-full animate-ping"></div>
-                      </div>
-                      {/* Orbiting particles */}
-                      {[...Array(3)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="absolute w-2 h-2 bg-[#FFD23F] rounded-full animate-orbit"
-                          style={{
-                            top: '50%',
-                            left: '50%',
-                            animationDelay: `${i * 0.8}s`,
-                            animationDuration: '3s'
-                          }}
-                        />
-                      ))}
+                  <div ref={athleticTiltRef} key={index} className="bg-black/30 p-6 rounded-2xl border border-yellow-500/30 text-center transition-all duration-300" style={{ transformStyle: 'preserve-3d' }}>
+                    <div className="icon-pop inline-block">
+                      <Icon size={40} className="mx-auto text-yellow-400 mb-4" />
                     </div>
-
-                    <h4 className="text-2xl font-bold text-white mb-2 sport-title">{achievement.sport}</h4>
-                    <p className="text-[#FFD23F] font-bold mb-4 text-lg">{achievement.role}</p>
-                    <p className="text-gray-300 mb-6 leading-relaxed">{achievement.description}</p>
-
-                    {/* Stats with Counter Animation */}
-                    <div className="grid grid-cols-3 gap-4 mt-6">
-                      {Object.entries(achievement.stats).map(([key, value], i) => (
-                        <div key={key} className="text-center">
-                          <div className="text-2xl font-bold text-[#FFD23F] counter-animation">
-                            {value}
-                          </div>
-                          <div className="text-xs text-gray-400 uppercase tracking-wider">
-                            {key.replace(/([A-Z])/g, ' $1').trim()}
-                          </div>
+                    <h4 className="text-xl font-bold text-white">{achievement.sport}</h4>
+                    <p className="font-semibold text-yellow-500 mb-3">{achievement.role}</p>
+                    <p className="text-sm text-gray-400 mb-4">{achievement.description}</p>
+                    <div className="flex justify-around border-t border-gray-700 pt-3">
+                      {Object.entries(achievement.stats).map(([key, value]) => (
+                        <div key={key}>
+                          <AnimatedStat value={value} />
+                          <p className="text-xs text-gray-500 uppercase">{key}</p>
                         </div>
                       ))}
                     </div>
@@ -429,46 +596,15 @@ const About = () => {
               })}
             </div>
 
-            {/* Athletic Philosophy with Pulse Effect */}
-            <div className="bg-gradient-to-r from-[#FFD23F]/10 via-[#FF6B6B]/10 to-[#FFD23F]/10 
-                          rounded-3xl p-12 relative overflow-hidden">
-              <div className="absolute inset-0 pulse-bg"></div>
-              <h4 className="text-4xl font-bold text-white mb-8 text-center relative z-10">
-                Athletic Values in Tech
-              </h4>
-              <div className="grid md:grid-cols-2 gap-8 relative z-10">
-                {[
-                  {
-                    title: 'Discipline & Consistency',
-                    desc: 'Daily training routines translate to consistent coding practices',
-                    color: '#FFD23F'
-                  },
-                  {
-                    title: 'Team Collaboration',
-                    desc: 'Understanding how individual contributions create collective success',
-                    color: '#FF6B6B'
-                  },
-                  {
-                    title: 'Performance Under Pressure',
-                    desc: 'Thriving in high-stakes competitions and tight project deadlines',
-                    color: '#4ECDC4'
-                  },
-                  {
-                    title: 'Continuous Improvement',
-                    desc: 'Always analyzing performance to optimize and push boundaries',
-                    color: '#9D4EDD'
-                  }
-                ].map((value, i) => (
-                  <div key={i} className="flex items-start space-x-4 group">
-                    <div 
-                      className="w-6 h-6 rounded-full mt-1 transition-all duration-300 group-hover:scale-150 group-hover:rotate-180"
-                      style={{ backgroundColor: value.color }}
-                    />
+            <div className="mt-16">
+              <h3 className="text-2xl font-bold text-center text-white mb-8">Athletic Values in Tech</h3>
+              <div className="grid md:grid-cols-2 gap-x-8 gap-y-8 max-w-4xl mx-auto">
+                {athleticValues.map((value, index) => (
+                  <div key={index} className="flex items-start gap-4 dot-pulse" style={{ '--dot-color': value.color } as React.CSSProperties}>
+                    <div className="w-3 h-3 mt-1.5 rounded-full flex-shrink-0 transition-all duration-300" style={{ backgroundColor: value.color }} />
                     <div>
-                      <h5 className="font-bold text-white text-xl mb-2 group-hover:text-[#FFD23F] transition-colors">
-                        {value.title}
-                      </h5>
-                      <p className="text-gray-300 leading-relaxed">{value.desc}</p>
+                      <h4 className="font-bold text-white">{value.text}</h4>
+                      <p className="text-sm text-gray-400">{value.description}</p>
                     </div>
                   </div>
                 ))}
@@ -476,24 +612,6 @@ const About = () => {
             </div>
           </div>
         )}
-
-        {/* Bottom CTA with Morphing Effect */}
-        <div className="text-center mt-20 py-12">
-          <p className="text-3xl text-gray-300 mb-8 morphing-cta">
-            Ready to see what I've been building?
-          </p>
-          <a
-            href="/projects"
-            className="inline-block px-12 py-6 bg-gradient-to-r from-[#00D4FF] to-[#9D4EDD] 
-                     rounded-2xl font-bold text-xl hover:scale-110 transition-all duration-300
-                     hover:shadow-2xl hover:shadow-[#00D4FF]/50 relative overflow-hidden group"
-          >
-            <span className="relative z-10">Explore My Projects</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-[#9D4EDD] to-[#FFD23F] 
-                          transform scale-x-0 group-hover:scale-x-100 transition-transform 
-                          duration-500 origin-center"></div>
-          </a>
-        </div>
       </div>
     </div>
   );
