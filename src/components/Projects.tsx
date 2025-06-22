@@ -232,16 +232,16 @@ const Projects = () => {
         {/* Call to Action - Responsive */}
         <div className="text-center mt-16 sm:mt-24 py-8 sm:py-12 px-4">
           <p className="text-2xl sm:text-3xl text-gray-300 mb-6 sm:mb-8">
-            Ready to jack into the matrix?
+            Interested in the story behind the code?
           </p>
-          <a
-            href="/contact"
+          <Link
+            to="/blog"
             className="inline-block px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-[#00D4FF] to-[#9D4EDD] 
                      rounded-2xl font-bold text-lg sm:text-xl hover:scale-110 transition-all duration-300
                      hover:shadow-2xl hover:shadow-[#00D4FF]/50 touch-button"
           >
-            Initialize Connection
-          </a>
+            Explore the Blog
+          </Link>
         </div>
       </div>
     </div>

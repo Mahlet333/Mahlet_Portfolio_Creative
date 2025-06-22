@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowRight, BookOpen, Tag, Feather, Scroll, Sparkles, Brain, Heart } from 'lucide-react';
+import { blogPosts, blogFilters } from '../data/blog';
 
 const Blog = () => {
   const [selectedTag, setSelectedTag] = useState('all');
@@ -27,91 +29,9 @@ const Blog = () => {
     };
   }, []);
 
-  const posts = [
-    {
-      id: 1,
-      title: 'The Art of Debugging: Lessons from 3 AM Coding Sessions',
-      excerpt: 'What late-night debugging sessions have taught me about persistence, pattern recognition, and the beauty of clean code.',
-      date: '2024-01-15',
-      readTime: '5 min read',
-      tags: ['Coding', 'Reflections'],
-      category: 'reflections',
-      mood: 'contemplative',
-      color: '#9D4EDD',
-      icon: Brain
-    },
-    {
-      id: 2,
-      title: 'Bridging Biology and AI: The Future of Medical Diagnosis',
-      excerpt: 'Exploring how multimodal AI models are revolutionizing medical diagnosis by combining imaging with biological data.',
-      date: '2024-01-10',
-      readTime: '8 min read',
-      tags: ['AI', 'Medical Research', 'Innovation'],
-      category: 'ml-notes',
-      mood: 'analytical',
-      color: '#00D4FF',
-      icon: Brain
-    },
-    {
-      id: 3,
-      title: 'From Dragon Boat to Data Science: Athletic Discipline in Tech',
-      excerpt: 'How the rhythms of dragon boat racing taught me about teamwork, timing, and synchronized effort in software development.',
-      date: '2024-01-08',
-      readTime: '4 min read',
-      tags: ['Athletics', 'Life Lessons', 'Teamwork'],
-      category: 'reflections',
-      mood: 'energetic',
-      color: '#FFD23F',
-      icon: Heart
-    },
-    {
-      id: 4,
-      title: 'Designing Inclusive AI: Lessons from Low-Resource Languages',
-      excerpt: 'My journey developing ASR systems for Amharic and Tigrinya, and what it taught me about digital inequality.',
-      date: '2024-01-05',
-      readTime: '6 min read',
-      tags: ['AI', 'Inclusion', 'Language Technology'],
-      category: 'ml-notes',
-      mood: 'passionate',
-      color: '#4ECDC4',
-      icon: Brain
-    },
-    {
-      id: 5,
-      title: 'The Visual Language of Data: Storytelling Through Numbers',
-      excerpt: 'How my background in photography and design influences the way I approach data visualization and user experience.',
-      date: '2024-01-03',
-      readTime: '7 min read',
-      tags: ['Design', 'Data Visualization', 'UX'],
-      category: 'design-diary',
-      mood: 'creative',
-      color: '#FF6B6B',
-      icon: Sparkles
-    },
-    {
-      id: 6,
-      title: 'Swimming Against the Current: Lessons in Resilience',
-      excerpt: 'What teaching swimming has taught me about breaking down complex problems and building confidence in learning.',
-      date: '2024-01-01',
-      readTime: '5 min read',
-      tags: ['Teaching', 'Resilience', 'Learning'],
-      category: 'reflections',
-      mood: 'inspiring',
-      color: '#9D4EDD',
-      icon: Heart
-    }
-  ];
-
-  const tags = [
-    { id: 'all', label: 'All Streams', count: posts.length, color: '#FFFFFF' },
-    { id: 'reflections', label: 'Reflections', count: posts.filter(p => p.category === 'reflections').length, color: '#9D4EDD' },
-    { id: 'ml-notes', label: 'ML Notes', count: posts.filter(p => p.category === 'ml-notes').length, color: '#00D4FF' },
-    { id: 'design-diary', label: 'Design Diary', count: posts.filter(p => p.category === 'design-diary').length, color: '#FF6B6B' },
-  ];
-
   const filteredPosts = selectedTag === 'all' 
-    ? posts 
-    : posts.filter(post => post.category === selectedTag);
+    ? blogPosts 
+    : blogPosts.filter(post => post.category === selectedTag);
 
   return (
     <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
@@ -161,7 +81,7 @@ const Blog = () => {
         {/* Floating Tag Bubbles - Responsive */}
         <div className="flex justify-center mb-12 sm:mb-16 px-4">
           <div className="flex flex-wrap gap-3 sm:gap-4 justify-center w-full max-w-4xl">
-            {tags.map(({ id, label, count, color }) => (
+            {blogFilters.map(({ id, label, color }) => (
               <button
                 key={id}
                 onClick={() => setSelectedTag(id)}
@@ -179,7 +99,6 @@ const Blog = () => {
               >
                 <Tag size={14} className="sm:w-4 sm:h-4" />
                 <span className="text-xs sm:text-sm font-medium">{label}</span>
-                <span className="text-xs opacity-70 bg-black/30 px-2 py-1 rounded-full">({count})</span>
                 
                 {/* Floating particles on hover */}
                 {selectedTag !== id && (
@@ -236,44 +155,22 @@ const Blog = () => {
                         <div className="flex items-center gap-4 text-sm text-gray-400">
                           <div className="flex items-center gap-1">
                             <Calendar size={14} />
-                            <span>{new Date(post.date).toLocaleDateString()}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock size={14} />
-                            <span>{post.readTime}</span>
+                            <span>{post.date}</span>
                           </div>
                         </div>
                       </div>
                     </div>
                     
-                    <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
-                      {post.excerpt}
-                    </p>
-                    
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {post.tags.map((tag, tagIndex) => (
-                        <span
-                          key={tagIndex}
-                          className="px-3 py-1 rounded-full text-xs font-medium"
-                          style={{
-                            backgroundColor: `${post.color}20`,
-                            color: post.color,
-                            border: `1px solid ${post.color}40`
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    
-                    <button className="liquid-read-more inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 touch-button"
-                            style={{
-                              backgroundColor: post.color,
-                              color: 'black'
-                            }}>
-                      <span>Read Full Stream</span>
-                      <ArrowRight size={16} />
-                    </button>
+                    <div className="prose prose-invert text-gray-300 text-sm sm:text-base leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: post.content.substring(0, 200) + '...' }} />
+
+                    <Link 
+                      to={`/blog/${post.id}`}
+                      className="inline-flex items-center font-semibold transition-colors duration-300 group"
+                      style={{ color: post.color }}
+                    >
+                      Read More
+                      <ArrowRight className="ml-2 w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                    </Link>
                   </div>
                   
                   {/* Mood Indicator */}
