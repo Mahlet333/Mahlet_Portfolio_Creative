@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://Mahlet333.github.io/Mahlet_Creative_Portfolio",
+  "homepage": "https://Mahlet333.github.io/Mahlet_Portfolio_Creative",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

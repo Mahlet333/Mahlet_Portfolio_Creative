@@ -5,14 +5,26 @@ const Blog = () => {
   const [selectedTag, setSelectedTag] = useState('all');
   const [isVisible, setIsVisible] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const riverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsVisible(true);
     
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const posts = [
@@ -112,10 +124,10 @@ const Blog = () => {
              rgba(13, 13, 13, 1) 100%)`
          }}>
       
-      {/* Flowing River Background */}
+      {/* Flowing River Background - Reduced on mobile */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="river-flow"></div>
-        {[...Array(50)].map((_, i) => (
+        {[...Array(isMobile ? 25 : 50)].map((_, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-white/20 rounded-full animate-float-stream"
@@ -131,30 +143,30 @@ const Blog = () => {
 
       <div className="max-w-6xl mx-auto relative z-10">
         
-        {/* Flowing Header */}
-        <div className={`text-center mb-16 transition-all duration-1000 ${
+        {/* Flowing Header - Responsive */}
+        <div className={`text-center mb-12 sm:mb-16 transition-all duration-1000 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
-          <h1 className="text-5xl sm:text-7xl font-bold mb-6 relative">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 relative">
             <span className="flowing-text text-[#00D4FF]" data-text="Stream of">Stream of</span>
             <span className="flowing-text text-white" data-text=" Consciousness"> Consciousness</span>
-            <div className="absolute -inset-6 bg-gradient-to-r from-[#00D4FF]/20 via-[#9D4EDD]/20 to-[#FF6B6B]/20 
+            <div className="absolute -inset-4 sm:-inset-6 bg-gradient-to-r from-[#00D4FF]/20 via-[#9D4EDD]/20 to-[#FF6B6B]/20 
                           blur-3xl -z-10 animate-pulse"></div>
           </h1>
-          <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed typewriter-blog">
+          <p className="text-base sm:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed typewriter-blog px-4">
             Thoughts, insights, and reflections from the intersection of technology, creativity, and human experience
           </p>
         </div>
 
-        {/* Floating Tag Bubbles */}
-        <div className="flex justify-center mb-16">
-          <div className="flex flex-wrap gap-4 justify-center">
+        {/* Floating Tag Bubbles - Responsive */}
+        <div className="flex justify-center mb-12 sm:mb-16 px-4">
+          <div className="flex flex-wrap gap-3 sm:gap-4 justify-center w-full max-w-4xl">
             {tags.map(({ id, label, count, color }) => (
               <button
                 key={id}
                 onClick={() => setSelectedTag(id)}
-                className={`bubble-tag flex items-center space-x-3 px-6 py-4 rounded-full 
-                          transition-all duration-500 relative overflow-hidden group ${
+                className={`bubble-tag flex items-center space-x-2 sm:space-x-3 px-4 sm:px-6 py-3 sm:py-4 rounded-full 
+                          transition-all duration-500 relative overflow-hidden group touch-button ${
                   selectedTag === id
                     ? 'text-black font-bold shadow-2xl transform scale-110'
                     : 'text-gray-300 hover:text-white hover:scale-105 bg-black/30 backdrop-blur-sm'
@@ -165,14 +177,14 @@ const Blog = () => {
                   border: `2px solid ${selectedTag === id ? color : 'rgba(255,255,255,0.2)'}`
                 }}
               >
-                <Tag size={16} className={selectedTag === id ? 'animate-spin-slow' : 'group-hover:animate-pulse'} />
-                <span className="text-sm font-medium">{label}</span>
+                <Tag size={14} className="sm:w-4 sm:h-4" />
+                <span className="text-xs sm:text-sm font-medium">{label}</span>
                 <span className="text-xs opacity-70 bg-black/30 px-2 py-1 rounded-full">({count})</span>
                 
                 {/* Floating particles on hover */}
                 {selectedTag !== id && (
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(isMobile ? 3 : 5)].map((_, i) => (
                       <div
                         key={i}
                         className="absolute w-1 h-1 rounded-full animate-float-particle"
@@ -191,192 +203,117 @@ const Blog = () => {
           </div>
         </div>
 
-        {/* Flowing Blog Stream */}
-        <div ref={riverRef} className="blog-river space-y-12">
+        {/* Flowing Blog Stream - Responsive */}
+        <div ref={riverRef} className="blog-river space-y-8 sm:space-y-12">
           {filteredPosts.map((post, index) => {
             const Icon = post.icon;
             const isEven = index % 2 === 0;
             
             return (
-              <article
+              <div
                 key={post.id}
-                className={`blog-boat relative transition-all duration-700 hover:scale-105 ${
-                  isEven ? 'float-left' : 'float-right'
-                }`}
-                style={{ 
-                  animationDelay: `${index * 0.2}s`,
-                  transform: `translateX(${scrollY * (isEven ? 0.1 : -0.1)}px)`
+                className={`floating-card bg-black/30 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-gray-700/50
+                          transition-all duration-500 hover:scale-105 hover:shadow-2xl
+                          ${isEven ? 'float-left' : 'float-right'}
+                          ${isMobile ? 'transform-none' : ''}`}
+                style={{
+                  transform: isMobile ? 'none' : `translateX(${isEven ? '-20px' : '20px'})`,
+                  borderColor: `${post.color}30`
                 }}
               >
-                <div className={`max-w-2xl ${isEven ? 'ml-0 mr-auto' : 'ml-auto mr-0'}`}>
-                  <div 
-                    className="bg-black/60 backdrop-blur-md rounded-3xl p-8 border-2 relative overflow-hidden
-                             hover:shadow-2xl transition-all duration-500 group"
-                    style={{ 
-                      borderColor: post.color,
-                      boxShadow: `0 0 30px ${post.color}30`
-                    }}
-                  >
-                    {/* Mood Indicator */}
-                    <div className="absolute top-4 right-4">
+                <div className="flex flex-col lg:flex-row gap-6">
+                  {/* Content */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4">
                       <div 
-                        className="w-4 h-4 rounded-full animate-pulse"
-                        style={{ backgroundColor: post.color }}
-                        title={`Mood: ${post.mood}`}
-                      />
-                    </div>
-
-                    {/* Flowing Background Pattern */}
-                    <div className="absolute inset-0 opacity-10">
-                      <div className="flowing-pattern" style={{ '--flow-color': post.color } as any}></div>
-                    </div>
-
-                    <div className="relative z-10">
-                      {/* Post Meta with Icon */}
-                      <div className="flex items-center space-x-4 text-sm text-gray-400 mb-6">
-                        <div className="flex items-center space-x-2">
-                          <Icon size={20} style={{ color: post.color }} className="animate-pulse" />
-                          <span className="font-medium" style={{ color: post.color }}>
-                            {post.mood.toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Calendar size={14} />
-                          <span>{new Date(post.date).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                          })}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Clock size={14} />
-                          <span>{post.readTime}</span>
+                        className="w-12 h-12 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: `${post.color}20` }}
+                      >
+                        <Icon size={24} style={{ color: post.color }} />
+                      </div>
+                      <div>
+                        <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">{post.title}</h2>
+                        <div className="flex items-center gap-4 text-sm text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <Calendar size={14} />
+                            <span>{new Date(post.date).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={14} />
+                            <span>{post.readTime}</span>
+                          </div>
                         </div>
                       </div>
-
-                      {/* Title with Flowing Effect */}
-                      <h2 className="text-3xl font-bold text-white mb-6 group-hover:text-[#00D4FF] 
-                                   transition-colors duration-300 leading-tight">
-                        {post.title}
-                      </h2>
-
-                      {/* Excerpt with Typewriter Effect */}
-                      <p className="text-gray-300 leading-relaxed mb-8 text-lg">
-                        {post.excerpt}
-                      </p>
-
-                      {/* Floating Tags */}
-                      <div className="flex flex-wrap gap-3 mb-8">
-                        {post.tags.map((tag, tagIndex) => (
-                          <span
-                            key={tag}
-                            className="px-4 py-2 rounded-full text-sm border transition-all duration-300
-                                     hover:scale-110 hover:rotate-3"
-                            style={{ 
-                              borderColor: `${post.color}60`,
-                              color: post.color,
-                              backgroundColor: `${post.color}10`,
-                              animationDelay: `${tagIndex * 0.1}s`
-                            }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Read More with Liquid Effect */}
-                      <button className="liquid-read-more flex items-center space-x-3 px-8 py-4 rounded-2xl 
-                                       font-medium transition-all duration-500 group-hover:scale-105 relative overflow-hidden"
-                              style={{ 
-                                backgroundColor: `${post.color}20`,
-                                border: `2px solid ${post.color}`,
-                                color: post.color
-                              }}>
-                        <BookOpen size={18} />
-                        <span>Dive Deeper</span>
-                        <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform duration-300" />
-                        
-                        {/* Liquid fill effect */}
-                        <div 
-                          className="absolute inset-0 transform scale-x-0 group-hover:scale-x-100 
-                                   transition-transform duration-500 origin-left -z-10"
-                          style={{ backgroundColor: post.color }}
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 
-                                      group-hover:opacity-100 transition-opacity duration-300 text-black font-bold">
-                          <BookOpen size={18} className="mr-3" />
-                          <span>Dive Deeper</span>
-                          <ArrowRight size={18} className="ml-3" />
-                        </div>
-                      </button>
                     </div>
-
-                    {/* Ripple Effect on Hover */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      <div className="ripple-effect opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                           style={{ '--ripple-color': post.color } as any}></div>
+                    
+                    <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
+                      {post.excerpt}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {post.tags.map((tag, tagIndex) => (
+                        <span
+                          key={tagIndex}
+                          className="px-3 py-1 rounded-full text-xs font-medium"
+                          style={{
+                            backgroundColor: `${post.color}20`,
+                            color: post.color,
+                            border: `1px solid ${post.color}40`
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <button className="liquid-read-more inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 touch-button"
+                            style={{
+                              backgroundColor: post.color,
+                              color: 'black'
+                            }}>
+                      <span>Read Full Stream</span>
+                      <ArrowRight size={16} />
+                    </button>
+                  </div>
+                  
+                  {/* Mood Indicator */}
+                  <div className="lg:w-32 flex lg:flex-col items-center gap-4">
+                    <div className="text-center">
+                      <div 
+                        className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
+                        style={{ backgroundColor: `${post.color}20` }}
+                      >
+                        <Feather size={24} style={{ color: post.color }} />
+                      </div>
+                      <p className="text-xs text-gray-400 capitalize">{post.mood}</p>
                     </div>
                   </div>
                 </div>
-              </article>
+              </div>
             );
           })}
         </div>
 
-        {/* Floating Coming Soon */}
-        <div className="text-center mt-20 py-16">
-          <div className="floating-card bg-black/40 backdrop-blur-md rounded-3xl p-12 max-w-3xl mx-auto
-                        border border-[#00D4FF]/30 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#00D4FF]/10 via-[#9D4EDD]/10 to-[#FF6B6B]/10"></div>
+        {/* Newsletter Section - Responsive */}
+        <div className="mt-16 sm:mt-24 py-12 sm:py-16 px-4">
+          <div className="flowing-newsletter-bg rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden">
             <div className="relative z-10">
-              <Feather size={48} className="text-[#00D4FF] mx-auto mb-6 animate-float" />
-              <h3 className="text-3xl font-bold text-[#00D4FF] mb-6">More Stories Flowing In</h3>
-              <p className="text-gray-300 mb-8 text-lg leading-relaxed">
-                I'm currently crafting several in-depth articles about AI ethics, the future of 
-                human-computer interaction, and lessons learned from my research journey.
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                Join the Stream
+              </h3>
+              <p className="text-gray-300 text-sm sm:text-base mb-6 max-w-2xl mx-auto">
+                Get notified when new thoughts flow into the stream. No spam, just authentic insights.
               </p>
-              <div className="flex items-center justify-center space-x-6">
-                <div className="flex space-x-3">
-                  {['#00D4FF', '#9D4EDD', '#FFD23F'].map((color, i) => (
-                    <div 
-                      key={i}
-                      className="w-3 h-3 rounded-full animate-pulse"
-                      style={{ 
-                        backgroundColor: color,
-                        animationDelay: `${i * 0.3}s`
-                      }}
-                    />
-                  ))}
-                </div>
-                <span className="text-gray-400 font-mono">Thoughts materializing...</span>
+              <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="flex-1 px-4 py-3 rounded-lg bg-black/50 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-[#00D4FF] transition-colors"
+                />
+                <button className="px-6 py-3 bg-gradient-to-r from-[#00D4FF] to-[#9D4EDD] rounded-lg font-medium text-black hover:scale-105 transition-all duration-300 touch-button">
+                  Subscribe
+                </button>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Newsletter with Flowing Design */}
-        <div className="bg-gradient-to-r from-[#00D4FF]/10 via-[#9D4EDD]/10 to-[#FF6B6B]/10 
-                      rounded-3xl p-12 mt-16 relative overflow-hidden">
-          <div className="absolute inset-0 flowing-newsletter-bg"></div>
-          <div className="text-center relative z-10">
-            <Scroll size={48} className="text-[#9D4EDD] mx-auto mb-6 animate-bounce" />
-            <h3 className="text-3xl font-bold text-white mb-6">Join the Stream</h3>
-            <p className="text-gray-300 mb-8 text-lg max-w-2xl mx-auto">
-              Get notified when new thoughts flow into the stream. No spam, just pure consciousness.
-            </p>
-            <div className="flex flex-col sm:flex-row max-w-lg mx-auto gap-4">
-              <input
-                type="email"
-                placeholder="your@consciousness.com"
-                className="flex-1 px-6 py-4 bg-black/50 text-white rounded-2xl 
-                         border border-[#00D4FF]/30 focus:border-[#00D4FF] focus:outline-none
-                         transition-all duration-300 backdrop-blur-sm"
-              />
-              <button className="px-8 py-4 bg-gradient-to-r from-[#00D4FF] to-[#9D4EDD] 
-                               text-black rounded-2xl font-bold hover:scale-105 
-                               transition-transform duration-300 shadow-lg">
-                Flow With Me
-              </button>
             </div>
           </div>
         </div>
