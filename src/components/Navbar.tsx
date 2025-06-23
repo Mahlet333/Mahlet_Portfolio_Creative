@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Code, User, Briefcase, BookOpen, Mail } from 'lucide-react';
+import ReactDOM from 'react-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,10 +29,42 @@ const Navbar = () => {
     { path: '/contact', label: 'CONTACT', icon: Mail },
   ];
 
+  const mobileMenu = (
+    <div className="md:hidden fixed inset-0 bg-black/95 backdrop-blur-md z-50 mobile-nav-overlay">
+      <div className="flex flex-col items-center justify-center h-full space-y-6 mobile-nav-menu">
+        {navItems.map(({ path, label, icon: Icon }) => (
+          <Link
+            key={path}
+            to={path}
+            onClick={() => setIsOpen(false)}
+            className={`flex items-center space-x-4 px-6 py-4 rounded-xl transition-all duration-300 touch-button w-full max-w-xs justify-center ${
+              location.pathname === path
+                ? 'text-[#00D4FF] bg-[#00D4FF]/10 border border-[#00D4FF]/30'
+                : 'text-gray-300 hover:text-[#00D4FF] hover:bg-[#00D4FF]/5 border border-transparent'
+            }`}
+          >
+            <Icon size={24} />
+            <span className="text-lg font-medium">{label}</span>
+          </Link>
+        ))}
+        {/* Close button for mobile */}
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-8 right-6 p-3 rounded-lg text-gray-400 hover:text-white transition-colors touch-button"
+          aria-label="Close menu"
+        >
+          <X size={24} />
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
       scrolled ? 'bg-[#0D0D0D]/95 backdrop-blur-md py-2' : 'bg-transparent py-4'
     }`}>
+      {/* Mobile Menu Overlay rendered as a portal */}
+      {isOpen && typeof window !== 'undefined' && ReactDOM.createPortal(mobileMenu, document.body)}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -69,38 +102,6 @@ const Navbar = () => {
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-
-        {/* Mobile Menu Overlay */}
-        {isOpen && (
-          <div className="md:hidden fixed inset-0 bg-black/95 backdrop-blur-md z-40 mobile-nav-overlay">
-            <div className="flex flex-col items-center justify-center h-full space-y-6 mobile-nav-menu">
-              {navItems.map(({ path, label, icon: Icon }) => (
-                <Link
-                  key={path}
-                  to={path}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center space-x-4 px-6 py-4 rounded-xl transition-all duration-300 touch-button w-full max-w-xs justify-center ${
-                    location.pathname === path
-                      ? 'text-[#00D4FF] bg-[#00D4FF]/10 border border-[#00D4FF]/30'
-                      : 'text-gray-300 hover:text-[#00D4FF] hover:bg-[#00D4FF]/5 border border-transparent'
-                  }`}
-                >
-                  <Icon size={24} />
-                  <span className="text-lg font-medium">{label}</span>
-                </Link>
-              ))}
-              
-              {/* Close button for mobile */}
-              <button
-                onClick={() => setIsOpen(false)}
-                className="absolute top-8 right-6 p-3 rounded-lg text-gray-400 hover:text-white transition-colors touch-button"
-                aria-label="Close menu"
-              >
-                <X size={24} />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );
