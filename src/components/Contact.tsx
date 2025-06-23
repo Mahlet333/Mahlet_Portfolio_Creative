@@ -100,7 +100,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
+    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden pb-16 sm:pb-24">
       {/* Matrix Rain Background - More muted color */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="matrix-rain"></div>
