@@ -1,91 +1,108 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { projects } from '../data/projects';
-import { ArrowLeft, Github, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Github, ExternalLink, FileText, MessageSquare } from 'lucide-react';
+import TemptationStory from './TemptationStory';
+import MFFStory from './MFFStory';
+import AfternoonNapStory from './AfternoonNapStory';
+import FeedrStory from './FeedrStory';
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const project = projects.find(p => p.id === Number(id));
+
+  const project = projects.find(p => p.id === parseInt(id || ''));
 
   if (!project) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black text-white">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-red-500">404</h1>
-          <p className="text-xl mt-4">Project not found.</p>
-          <button
-            onClick={() => navigate('/projects')}
-            className="mt-8 px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
-          >
-            Back to Projects
-          </button>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <h1 className="text-4xl">Project not found</h1>
       </div>
     );
   }
 
+  const renderContent = () => {
+    if (project.id === 5) return <FeedrStory />;
+    if (project.id === 10) return <TemptationStory />;
+    if (project.id === 8) return <MFFStory />;
+    if (project.id === 11) return <AfternoonNapStory />;
+    
+    return (
+      <>
+        <div className="prose prose-invert max-w-none text-lg text-gray-300 mb-8" dangerouslySetInnerHTML={{ __html: project.detailedDescription.replace(/\. /g, '.<br/><br/>') }} />
+        {project.id === 7 && (
+          <div className="my-8">
+            <a
+              href="https://drive.google.com/file/d/15-jbV9KA9-xIa_DefHYw010WY9Gaac5q/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-6 rounded-2xl bg-gradient-to-r from-[#9D4EDD]/20 to-[#00D4FF]/20 border border-[#9D4EDD]/50 hover:border-[#9D4EDD] transition-all duration-300 group hover:scale-105"
+            >
+              <div className="flex items-center gap-4">
+                <FileText size={40} className="text-[#9D4EDD]" />
+                <div>
+                  <h4 className="text-xl font-bold text-white group-hover:text-[#9D4EDD] transition-colors">View Project Details</h4>
+                  <p className="text-gray-400">Click to open the full project document in Google Drive.</p>
+                </div>
+              </div>
+            </a>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-black text-gray-300 font-sans p-4 sm:p-8">
+    <div className="min-h-screen bg-black text-white pt-24 sm:pt-32 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 group"
+          onClick={() => navigate('/projects')}
+          className="flex items-center gap-2 text-[#00D4FF] hover:text-white transition-colors mb-8 group"
         >
-          <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-          <span className="font-semibold">Back</span>
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Projects</span>
         </button>
 
-        <main>
-          <div className="text-center mb-12">
-            <h1
-              className="text-4xl sm:text-6xl font-bold text-white mb-2"
-              style={{ color: project.color }}
-            >
-              {project.title}
-            </h1>
-            <p className="text-lg text-gray-400">{project.subtitle}</p>
+        <div className="relative mb-8">
+          <img src={project.imageUrl} alt={project.title} className="w-full h-auto object-cover rounded-2xl shadow-2xl shadow-gray-900" style={{ maxHeight: '500px' }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent rounded-2xl"></div>
+          <div className="absolute bottom-0 left-0 p-6 sm:p-10">
+            <h1 className="text-3xl sm:text-5xl font-bold text-white mb-2">{project.title}</h1>
+            <h2 className="text-lg sm:text-xl text-gray-400">{project.subtitle}</h2>
           </div>
+        </div>
 
-          <div className="bg-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-10 mb-8">
-            <p className="text-base sm:text-lg leading-relaxed text-gray-300">
-              {project.detailedDescription}
-            </p>
+        <div className="bg-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-10 mb-8">
+          {renderContent()}
+        </div>
+        
+        {/* Technologies */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold mb-4 text-[#00D4FF]">Technologies Used</h3>
+          <div className="flex flex-wrap gap-3">
+            {project.technologies.map(tech => (
+              <span key={tech} className="px-4 py-2 text-sm rounded-full font-medium" style={{ backgroundColor: `${project.color}20`, color: project.color }}>
+                {tech}
+              </span>
+            ))}
           </div>
-          
-          <div className="my-8 sm:my-12 flex justify-center">
-            <div className="w-full max-w-lg bg-gray-900 border-2 border-dashed border-gray-600 rounded-xl p-4">
-               <img 
-                 src={project.imageUrl} 
-                 alt={`${project.title} screenshot`}
-                 className="w-full h-auto rounded-lg object-cover"
-               />
-            </div>
-          </div>
-          
-          <div className="bg-gray-900/50 border border-gray-700 rounded-2xl p-6 sm:p-10">
-            <h2 className="text-2xl font-bold text-white mb-4">Core Features</h2>
-            <ul className="list-disc list-inside space-y-2">
-              {project.features?.map((feature, index) => (
-                <li key={index} className="text-gray-400">{feature}</li>
-              ))}
-            </ul>
-             <div className="mt-8 flex justify-center gap-4">
-              {project.github && (
-                <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
-                  <Github className="w-5 h-5" />
-                  <span>GitHub</span>
-                </a>
-              )}
-              {project.demo && (
-                <a href={project.demo} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors">
-                  <ExternalLink className="w-5 h-5" />
-                  <span>Live Demo</span>
-                </a>
-              )}
-            </div>
-          </div>
-        </main>
+        </div>
+
+        {/* Links */}
+        <div className="flex items-center gap-6">
+          {project.github && (
+            <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-300 hover:text-[#00D4FF] transition-colors group">
+              <Github size={24} />
+              <span className="text-lg">GitHub</span>
+            </a>
+          )}
+          {project.demo && (
+            <a href={project.demo} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-300 hover:text-[#00D4FF] transition-colors group">
+              <ExternalLink size={24} />
+              <span className="text-lg">Live Demo</span>
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -158,8 +158,8 @@ const Contact = () => {
                   </div>
                   <span className="text-white font-mono text-xs sm:text-sm flex items-center space-x-1 sm:space-x-2">
                     <Terminal size={12} className="sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">contact://mahlet.nyu.edu</span>
-                    <span className="sm:hidden">mahlet.nyu.edu</span>
+                    <span className="hidden sm:inline">contact://ma7030@nyu.edu</span>
+                    <span className="sm:hidden">ma7030@nyu.edu</span>
                   </span>
                 </div>
                 <div className="flex items-center space-x-1 sm:space-x-2 text-white">
@@ -296,7 +296,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="text-white font-medium text-sm sm:text-base">Email</p>
-                    <p className="text-gray-300 text-xs sm:text-sm">mahlet@nyu.edu</p>
+                    <p className="text-gray-300 text-xs sm:text-sm">ma7030@nyu.edu</p>
                   </div>
                 </div>
                 
@@ -327,7 +327,7 @@ const Contact = () => {
               <h3 className="text-xl sm:text-2xl font-bold text-[#9D4EDD] mb-4 sm:mb-6">Social Networks</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <a
-                  href="https://linkedin.com/in/mahlet"
+                  href="https://linkedin.com/in/mahlet-atrsaw-andargei-2a881925b"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-3 p-3 rounded-lg bg-[#0077B5]/20 border border-[#0077B5]/30 
@@ -341,26 +341,15 @@ const Contact = () => {
                   href="https://github.com/Mahlet333"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-[#333]/20 border border-[#333]/30 
-                           hover:bg-[#333]/30 transition-all duration-300 group touch-button"
+                  className="flex items-center space-x-3 p-3 rounded-lg bg-[#9D4EDD]/20 border border-[#9D4EDD]/30 
+                           hover:bg-[#9D4EDD]/30 transition-all duration-300 group touch-button"
                 >
-                  <Github size={20} className="text-white" />
+                  <Github size={20} className="text-[#9D4EDD]" />
                   <span className="text-white text-sm sm:text-base">GitHub</span>
                 </a>
                 
                 <a
-                  href="https://twitter.com/mahlet"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-[#1DA1F2]/20 border border-[#1DA1F2]/30 
-                           hover:bg-[#1DA1F2]/30 transition-all duration-300 group touch-button"
-                >
-                  <Twitter size={20} className="text-[#1DA1F2]" />
-                  <span className="text-white text-sm sm:text-base">Twitter</span>
-                </a>
-                
-                <a
-                  href="mailto:mahlet@nyu.edu"
+                  href="mailto:ma7030@nyu.edu"
                   className="flex items-center space-x-3 p-3 rounded-lg bg-[#00D4FF]/20 border border-[#00D4FF]/30 
                            hover:bg-[#00D4FF]/30 transition-all duration-300 group touch-button"
                 >

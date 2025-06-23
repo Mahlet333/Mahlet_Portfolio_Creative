@@ -738,10 +738,34 @@
 }
 
 /* Hex Shape */
+.hex-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--border-color);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
 .hex-shape {
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  border: 2px solid;
   transition: all 0.3s ease;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  z-index: 1;
+}
+
+.hex-shape::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.4), transparent);
+  z-index: 0;
 }
 
 /* Scan Animation */

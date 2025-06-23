@@ -139,15 +139,19 @@ const Projects = () => {
                     }}
                   >
                     {/* Hexagonal Container - Responsive */}
-                    <div className="hex-container w-72 h-80 sm:w-80 sm:h-96 relative">
+                    <div 
+                      className="hex-container w-72 h-80 sm:w-80 sm:h-96 relative"
+                      style={{
+                        '--border-color': project.color,
+                        boxShadow: isHovered 
+                          ? `0 0 60px ${project.color}60` 
+                          : `0 0 20px ${project.color}30`,
+                      } as React.CSSProperties}
+                    >
                       <div 
                         className="hex-shape absolute inset-0 transition-all duration-500 overflow-hidden"
                         style={{
                           backgroundColor: `${project.color}10`,
-                          borderColor: project.color,
-                          boxShadow: isHovered 
-                            ? `0 0 60px ${project.color}60` 
-                            : `0 0 20px ${project.color}30`,
                         }}
                       >
                         <div
@@ -163,7 +167,7 @@ const Projects = () => {
                       </div>
                       
                       {/* Content inside hexagon - Responsive */}
-                      <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-16 sm:p-6 sm:pb-20">
+                      <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-16 sm:p-6 sm:pb-20 z-10">
                         <div className="w-full">
                           <h3 className="text-lg sm:text-2xl font-bold text-white mb-2" style={{ textShadow: '0 2px 10px black' }}>{project.title}</h3>
                           

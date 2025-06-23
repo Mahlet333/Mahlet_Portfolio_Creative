@@ -26,10 +26,10 @@ const BlogDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-gray-300 font-sans p-4 sm:p-8">
+    <div className="min-h-screen bg-black text-gray-300 font-sans p-4 sm:p-8 pt-24 sm:pt-32">
       <div className="max-w-4xl mx-auto">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/blog')}
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 group"
         >
           <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
@@ -51,9 +51,10 @@ const BlogDetail = () => {
             <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
           </div>
 
-          <article className="prose prose-invert lg:prose-xl max-w-none mx-auto text-gray-300">
-            {post.content}
-          </article>
+          <article
+            className="prose prose-invert lg:prose-xl max-w-none mx-auto text-gray-300"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
 
           <div className="mt-16 border-t border-gray-700 pt-8">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
@@ -69,7 +70,7 @@ const BlogDetail = () => {
                 type="submit"
                 className="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold text-white transition-colors"
               >
-                Button
+                Send
               </button>
             </form>
           </div>

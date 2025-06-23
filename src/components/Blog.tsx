@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, ArrowRight, BookOpen, Tag, Feather, Scroll, Sparkles, Brain, Heart } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, BookOpen, Tag, Feather, Scroll, Sparkles, Brain, Heart, Send, CheckCircle, XCircle } from 'lucide-react';
 import { blogPosts, blogFilters } from '../data/blog';
 
 const Blog = () => {
@@ -9,6 +9,10 @@ const Blog = () => {
   const [scrollY, setScrollY] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const riverRef = useRef<HTMLDivElement>(null);
+  
+  const [email, setEmail] = useState('');
+  const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [subscribeMessage, setSubscribeMessage] = useState('');
 
   useEffect(() => {
     setIsVisible(true);
@@ -28,6 +32,31 @@ const Blog = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      setSubscribeStatus('error');
+      setSubscribeMessage('Please enter a valid email address.');
+      setTimeout(() => setSubscribeStatus('idle'), 3000);
+      return;
+    }
+
+    setSubscribeStatus('submitting');
+    setSubscribeMessage('');
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    setSubscribeStatus('success');
+    setSubscribeMessage("Thanks for subscribing! You're on the list.");
+    setEmail('');
+
+    setTimeout(() => {
+      setSubscribeStatus('idle');
+      setSubscribeMessage('');
+    }, 5000);
+  };
 
   const filteredPosts = selectedTag === 'all' 
     ? blogPosts 
@@ -80,30 +109,30 @@ const Blog = () => {
 
         {/* Floating Tag Bubbles - Responsive */}
         <div className="flex justify-center mb-12 sm:mb-16 px-4">
-          <div className="flex flex-wrap gap-3 sm:gap-4 justify-center w-full max-w-4xl">
+          <div className="flex flex-wrap gap-2 sm:gap-4 justify-center w-full max-w-4xl">
             {blogFilters.map(({ id, label, color }) => (
               <button
                 key={id}
                 onClick={() => setSelectedTag(id)}
-                className={`bubble-tag flex items-center space-x-2 sm:space-x-3 px-4 sm:px-6 py-3 sm:py-4 rounded-full 
+                className={`bubble-tag flex items-center space-x-2 px-3 py-2 sm:px-6 sm:py-4 rounded-full 
                           transition-all duration-500 relative overflow-hidden group touch-button ${
                   selectedTag === id
-                    ? 'text-black font-bold shadow-2xl transform scale-110'
+                    ? 'text-black font-bold shadow-2xl transform scale-105 sm:scale-110'
                     : 'text-gray-300 hover:text-white hover:scale-105 bg-black/30 backdrop-blur-sm'
                 }`}
                 style={{
                   backgroundColor: selectedTag === id ? color : undefined,
-                  boxShadow: selectedTag === id ? `0 0 40px ${color}60` : '0 0 20px rgba(255,255,255,0.1)',
-                  border: `2px solid ${selectedTag === id ? color : 'rgba(255,255,255,0.2)'}`
+                  boxShadow: selectedTag === id ? `0 0 20px ${color}40, 0 0 40px ${color}60` : '0 0 20px rgba(255,255,255,0.1)',
+                  border: `1px solid ${selectedTag === id ? color : 'rgba(255,255,255,0.2)'}`
                 }}
               >
-                <Tag size={14} className="sm:w-4 sm:h-4" />
+                <Tag size={14} className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="text-xs sm:text-sm font-medium">{label}</span>
                 
                 {/* Floating particles on hover */}
                 {selectedTag !== id && (
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {[...Array(isMobile ? 3 : 5)].map((_, i) => (
+                    {[...Array(isMobile ? 2 : 5)].map((_, i) => (
                       <div
                         key={i}
                         className="absolute w-1 h-1 rounded-full animate-float-particle"
@@ -123,7 +152,7 @@ const Blog = () => {
         </div>
 
         {/* Flowing Blog Stream - Responsive */}
-        <div ref={riverRef} className="blog-river space-y-8 sm:space-y-12">
+        <div ref={riverRef} className="blog-river space-y-8 sm:space-y-12 flow-root">
           {filteredPosts.map((post, index) => {
             const Icon = post.icon;
             const isEven = index % 2 === 0;
@@ -172,19 +201,6 @@ const Blog = () => {
                       <ArrowRight className="ml-2 w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
                   </div>
-                  
-                  {/* Mood Indicator */}
-                  <div className="lg:w-32 flex lg:flex-col items-center gap-4">
-                    <div className="text-center">
-                      <div 
-                        className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
-                        style={{ backgroundColor: `${post.color}20` }}
-                      >
-                        <Feather size={24} style={{ color: post.color }} />
-                      </div>
-                      <p className="text-xs text-gray-400 capitalize">{post.mood}</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             );
@@ -201,16 +217,48 @@ const Blog = () => {
               <p className="text-gray-300 text-sm sm:text-base mb-6 max-w-2xl mx-auto">
                 Get notified when new thoughts flow into the stream. No spam, just authentic insights.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                 <input
                   type="email"
                   placeholder="your@email.com"
-                  className="flex-1 px-4 py-3 rounded-lg bg-black/50 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-[#00D4FF] transition-colors"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={subscribeStatus === 'submitting' || subscribeStatus === 'success'}
+                  className="flex-1 px-4 py-3 rounded-lg bg-black/50 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-[#00D4FF] transition-all duration-300 disabled:opacity-50"
                 />
-                <button className="px-6 py-3 bg-gradient-to-r from-[#00D4FF] to-[#9D4EDD] rounded-lg font-medium text-black hover:scale-105 transition-all duration-300 touch-button">
-                  Subscribe
+                <button 
+                  type="submit"
+                  disabled={subscribeStatus === 'submitting' || subscribeStatus === 'success'}
+                  className="px-6 py-3 bg-gradient-to-r from-[#00D4FF] to-[#9D4EDD] rounded-lg font-medium text-black hover:scale-105 transition-all duration-300 touch-button disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {subscribeStatus === 'submitting' ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black mr-2"></div>
+                      Subscribing...
+                    </>
+                  ) : subscribeStatus === 'success' ? (
+                    <>
+                      <CheckCircle size={20} className="mr-2" />
+                      Success!
+                    </>
+                  ) : (
+                    <>
+                      <Send size={16} className="mr-2" />
+                      Subscribe
+                    </>
+                  )}
                 </button>
-              </div>
+              </form>
+              {subscribeStatus === 'error' && (
+                <p className="mt-4 text-red-400 flex items-center justify-center gap-2">
+                  <XCircle size={16} /> {subscribeMessage}
+                </p>
+              )}
+               {subscribeStatus === 'success' && (
+                <p className="mt-4 text-green-400 flex items-center justify-center gap-2">
+                  <CheckCircle size={16} /> {subscribeMessage}
+                </p>
+              )}
             </div>
           </div>
         </div>

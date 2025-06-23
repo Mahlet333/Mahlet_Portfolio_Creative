@@ -5,6 +5,10 @@ import CAIImage from '../assets/CAI.jpg';
 import TLDImage from '../assets/TLD.jpg';
 import ClevelandImage from '../assets/Cleveland.png';
 import GazelleImage from '../assets/Gazelle.jpg';
+import LetsRiseImage from '../assets/letsrise_logo.jpeg';
+import MicrosoftImage from '../assets/Microsoft.png';
+import FarisImage from '../assets/faris.png';
+import ComputationalBiologyImage from '../assets/computational_biology.jpeg';
 
 // Custom Hook for 3D Tilt Effect on Profile
 const useProfileTilt = () => {
@@ -234,7 +238,7 @@ const About = () => {
       items: [
         {
           title: 'Research Assistant – Computational Biology & Bioinformatics Lab',
-          logo: 'https://picsum.photos/seed/compbio/40/40',
+          logo: ComputationalBiologyImage,
           location: 'NYU Abu Dhabi',
           date: 'Mar 2025 – Present',
           description: 'Working on a diagnostic tool for Multiple Sclerosis by combining brain MRI scans and gut microbiome data. Built custom neural networks for these data types and used explainability tools to better understand the results.',
@@ -260,7 +264,7 @@ const About = () => {
         },
         {
           title: 'Software Engineer – LETSRISE Enterprise / Hub71',
-          logo: 'https://picsum.photos/seed/letsrise/40/40',
+          logo: LetsRiseImage,
           location: 'Abu Dhabi',
           date: 'May 2024 – Oct 2024',
           description: 'Built a full-stack web app with Flask, Vue.js, and PostgreSQL. Developed secure APIs, live data visualizations, and a system to match identities to help entrepreneurs collaborate.',
@@ -274,7 +278,7 @@ const About = () => {
         },
         {
           title: 'Microsoft Learn Student Ambassador',
-          logo: 'https://picsum.photos/seed/microsoft/40/40',
+          logo: MicrosoftImage,
           location: 'Remote',
           date: 'Dec 2023 – May 2024',
           description: 'Ran over 10 workshops on cloud computing, DevOps, and AI/ML with Azure. Built demo apps and tools for outreach.',
@@ -286,7 +290,7 @@ const About = () => {
       items: [
         {
           title: 'AI & Web Instructor – Faris Technology Institute',
-          logo: 'https://picsum.photos/seed/faris/40/40',
+          logo: FarisImage,
           location: 'Addis Ababa',
           date: 'Jun 2023 – Dec 2023',
           description: 'Taught full-stack web development and Python for AI to 100+ students. Developed a social entrepreneurship platform in three languages.',
@@ -411,7 +415,7 @@ const About = () => {
               </div>
             </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mt-6 sm:mt-8 mb-3 sm:mb-4">A Multifaceted Profile</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mt-6 sm:mt-8 mb-3 sm:mb-4">My Profile</h1>
           <p className="text-xs text-gray-500 italic max-w-md mx-auto mb-4 sm:mb-6 px-4">
             This sweet sketch, drawn by a refugee child I've been lucky to mentor, shows their kind view of me.
           </p>
