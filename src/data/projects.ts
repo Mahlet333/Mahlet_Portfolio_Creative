@@ -25,7 +25,7 @@ export const projects = [
     color: '#9D4EDD',
     status: 'Dec 2024 – Present',
     github: 'https://github.com/Mahlet333/Mahlet_Portfolio_Creative',
-    demo: 'https://mahlet-portfolio-creative.vercel.app',
+    demo: 'https://mahlet333.github.io/Mahlet_Portfolio_Creative/',
   },
   // AI-Related Research
   {
