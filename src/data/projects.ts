@@ -8,8 +8,25 @@ import PregnetImage from "../assets/Pregnet.png";
 import FeedrImage from "../assets/feedr.png";
 import MSImage from "../assets/MS.png";
 import MEDCAMImage from "../assets/MEDCAM.jpg";
+import MeImage from "../assets/me.png";
 
 export const projects = [
+  // Portfolio Website
+  {
+    id: 1,
+    title: 'Creative Portfolio',
+    subtitle: 'Personal Website',
+    category: 'software',
+    imageUrl: MeImage,
+    description: 'A modern, interactive portfolio website showcasing creative projects, research work, and professional experience with a cyberpunk aesthetic.',
+    detailedDescription: "A comprehensive personal portfolio website built with React, TypeScript, and Tailwind CSS. Features an interactive design with cyberpunk aesthetics, particle effects, and smooth animations. The site includes project showcases, blog functionality, contact forms, and responsive design for all devices. Demonstrates skills in modern web development, UI/UX design, and creative storytelling.",
+    technologies: ['React', 'TypeScript', 'Tailwind CSS', 'Vite', 'Responsive Design', 'UI/UX'],
+    icon: Code,
+    color: '#9D4EDD',
+    status: 'Dec 2024 – Present',
+    github: 'https://github.com/Mahlet333/Mahlet_Portfolio_Creative',
+    demo: 'https://mahlet-portfolio-creative.vercel.app',
+  },
   // AI-Related Research
   {
     id: 2,
